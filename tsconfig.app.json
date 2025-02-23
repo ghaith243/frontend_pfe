@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./src",  // Racine du projet
+    "outDir": "./out-tsc/app",
+    "types": [
+      "@angular/localize",
+      
+    ],
+    "paths": {
+      "@services/*": ["src/app/services/*"],  // Ajoutez ceci pour résoudre les services
+      "@docs-components/*": ["src/components/*"]
+    }
+  },
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.ts",  // Inclure tous les fichiers .ts
+    "src/**/*.d.ts"
+  ]
+}
