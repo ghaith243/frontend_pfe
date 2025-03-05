@@ -1,4 +1,12 @@
 <div class="container">
+  <!-- Notifications en temps réel -->
+  <div *ngIf="notifications.length > 0" class="alert alert-info">
+    <h4>📢 Notifications :</h4>
+    <ul>
+      <li *ngFor="let notification of notifications">{{ notification }}</li>
+    </ul>
+  </div>
+
   <h2>Bienvenue, {{ user.nom }} {{ user.prenom }}</h2>
   <p><strong>Rôle:</strong> {{ role }}</p>
 
@@ -15,13 +23,11 @@
           <label for="dateDebut">Date de début:</label>
           <input type="date" id="dateDebut" [(ngModel)]="conge.dateDebut" name="dateDebut" class="form-control" required>
         </div>
-        
         <div class="form-group col-md-6">
           <label for="dateFin">Date de fin:</label>
           <input type="date" id="dateFin" [(ngModel)]="conge.dateFin" name="dateFin" class="form-control" required>
         </div>
       </div>
-
       <div class="form-group">
         <label for="type">Type de congé:</label>
         <select id="type" [(ngModel)]="conge.type" name="type" class="form-control" required>
@@ -30,12 +36,10 @@
           <option value="MALADIE">Maladie</option>
         </select>
       </div>
-
       <div class="form-group">
         <label for="motif">Motif:</label>
         <textarea id="motif" [(ngModel)]="conge.motif" name="motif" class="form-control" required></textarea>
       </div>
-
       <button type="submit" class="btn btn-primary" [disabled]="isLoading">
         {{ isLoading ? 'Envoi en cours...' : 'Soumettre' }}
       </button>
@@ -75,7 +79,6 @@
       <option value="APPROUVE">Approuvé</option>
       <option value="REJETE">Rejeté</option>
     </select>
-
     <table class="table">
       <thead>
         <tr>

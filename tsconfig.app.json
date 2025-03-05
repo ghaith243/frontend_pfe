@@ -13,7 +13,9 @@
     }
   },
   "files": [
-    "src/main.ts"
+    "src/main.ts",
+    "src/window-gobal-fix.ts"
+   
   ],
   "include": [
     "src/**/*.ts",  // Inclure tous les fichiers .ts

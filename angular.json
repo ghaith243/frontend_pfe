@@ -28,7 +28,8 @@
             "browser": "src/main.ts",
             "polyfills": [
               "@angular/localize/init",
-              "zone.js"
+              "zone.js",
+              "src/window-gobal-fix.ts"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",

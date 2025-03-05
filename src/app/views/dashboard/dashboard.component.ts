@@ -2,25 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CongesService } from '../../services/conges.service';
 import { UserserviceService } from '../../services/userservice.service';
+import { NotificationsService } from 'app/services/notifications.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule,FullCalendarModule]
+  imports: [FormsModule, CommonModule, FullCalendarModule]
 })
 export class DashboardComponent implements OnInit {
   user: any = {};
   userConges: any[] = [];
   serviceConges: any[] = [];
   filteredConges: any[] = [];
+  notifications: string[] = [];
   conge = {
     dateDebut: '',
     dateFin: '',
@@ -49,7 +50,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private userservice: UserserviceService,
     private router: Router,
-    private congeservice: CongesService
+    private congeservice: CongesService,
+    private notificationService: NotificationsService
   ) {}
 
   ngOnInit(): void {
@@ -62,27 +64,35 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.userservice.getEmployeeData(token).subscribe(
       (data) => {
-        console.log('Données utilisateur reçues:', data); // Vérifier la structure
+        console.log('Données utilisateur reçues:', data);
         this.user = data;
         this.role = data.role;
         this.utilisateurId = data.id;
-        this.serviceId = data.serviceId;  // Assurez-vous qu'il est bien défini
-    
-        console.log('Service ID en frontend:', this.serviceId); // Vérification
-    
+        this.serviceId = data.serviceId;
+
+        // Stocker l'ID de l'utilisateur pour la souscription des notifications
+        localStorage.setItem('userId', this.utilisateurId.toString());
+
         if (this.role === 'CHEF' && this.serviceId) {
           this.loadCongesByService();
         } else {
           this.getConges();
         }
+
+        // Souscription unique aux notifications
+        this.notificationService.notifications$.subscribe((msgs) => {
+          this.notifications = msgs;
+        });
+
+        this.isLoading = false;
       },
       (error) => {
         console.error('Erreur lors de la récupération des données utilisateur', error);
         this.showError('Erreur lors de la récupération des données utilisateur.');
+        this.isLoading = false;
       }
     );
   }
-    
 
   getConges(): void {
     const token = localStorage.getItem('token');
@@ -92,8 +102,6 @@ export class DashboardComponent implements OnInit {
     this.congeservice.getCongesByUtilisateur(this.utilisateurId, token).subscribe(
       (data) => {
         this.userConges = data;
-        this.isLoading = false;
-    
         this.calendarOptions = {
           ...this.calendarOptions,
           events: this.userConges.map(conge => ({
@@ -103,6 +111,7 @@ export class DashboardComponent implements OnInit {
             color: conge.status === 'APPROUVE' ? 'green' : 'red'
           }))
         };
+        this.isLoading = false;
       },
       (error) => {
         console.error('Erreur lors de la récupération des congés', error);
@@ -122,7 +131,7 @@ export class DashboardComponent implements OnInit {
         console.log('Données reçues pour le service:', data);
         this.serviceConges = data;
         this.filteredConges = [...data];
-        this.isLoading = true;
+        this.isLoading = false;
       },
       (error) => {
         console.error('Erreur lors de la récupération des congés du service', error);
@@ -133,7 +142,7 @@ export class DashboardComponent implements OnInit {
   }
 
   soumettreConge(): void {
-    if (!this.conge.dateDebut.trim() || !this.conge.dateFin.trim() || 
+    if (!this.conge.dateDebut.trim() || !this.conge.dateFin.trim() ||
         !this.conge.type.trim() || !this.conge.motif.trim()) {
       this.showError('Veuillez remplir tous les champs.');
       return;
@@ -169,15 +178,7 @@ export class DashboardComponent implements OnInit {
       },
       (error) => {
         console.error('Erreur lors de la soumission de la demande de congé', error);
-        if (error.status === 400) {
-          this.showError('Données invalides. Vérifiez les informations saisies.');
-        } else if (error.status === 401) {
-          this.showError('Votre session a expiré. Veuillez vous reconnecter.');
-        } else if (error.status === 500) {
-          this.showError('Erreur serveur. Veuillez réessayer plus tard.');
-        } else {
-          this.showError('Une erreur inconnue s\'est produite.');
-        }
+        this.showError('Une erreur est survenue lors de la soumission.');
       }
     ).add(() => {
       this.isLoading = false;
@@ -187,22 +188,23 @@ export class DashboardComponent implements OnInit {
   approveOrRejectConge(congeId: number, status: string): void {
     const token = localStorage.getItem('token');
     if (!token) return;
-  
+
     this.isLoading = true;
     this.congeservice.updateCongeStatus(congeId, status, token).subscribe(
       (response) => {
         console.log('Réponse serveur:', response);
         this.showSuccess('Le statut du congé a été mis à jour.');
-        // Recharger la liste des congés après mise à jour
         this.loadCongesByService();
       },
       (error) => {
         console.error('Erreur lors de la mise à jour du statut', error);
         this.showError('Erreur lors de la mise à jour du statut.');
       }
-    );
+    ).add(() => {
+      this.isLoading = false;
+    });
   }
-  
+
   filterCongesByStatus(): void {
     this.filteredConges = this.selectedStatus === 'TOUS'
       ? this.serviceConges
