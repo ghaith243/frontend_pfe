@@ -1,11 +1,20 @@
 <div class="container">
-  <!-- Notifications en temps réel -->
-  <div *ngIf="notifications.length > 0" class="alert alert-info">
-    <h4>📢 Notifications :</h4>
-    <ul>
-      <li *ngFor="let notification of notifications">{{ notification }}</li>
-    </ul>
-  </div>
+      <!-- Notifications Panel -->
+      <div *ngIf="notifications.length > 0" class="notification-container">
+        <div class="notification-title">🔔 Notifications</div>
+        <ul class="notification-list">
+          <li *ngFor="let notification of notifications; let i = index" class="notification-item">
+            <span class="notification-icon">📩</span>
+            <span class="notification-text">{{ notification }}</span>
+            <button class="close-btn" (click)="removeNotification(i)">✖</button>
+          </li>
+        </ul>
+      </div>
+  
+  
+  
+  
+  
 
   <h2>Bienvenue, {{ user.nom }} {{ user.prenom }}</h2>
   <p><strong>Rôle:</strong> {{ role }}</p>

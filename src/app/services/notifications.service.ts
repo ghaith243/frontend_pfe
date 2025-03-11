@@ -28,6 +28,7 @@ export class NotificationsService {
 
       // Abonnement aux notifications générales
       this.stompClient.subscribe('/topic/notifications', (message) => {
+        console.log('📩 Notification générale reçue:', message.body);
         this.addNotification(message.body);
       });
 
@@ -35,6 +36,7 @@ export class NotificationsService {
       const userId = localStorage.getItem('userId');
       if (userId) {
         this.stompClient.subscribe(`/topic/user/${userId}`, (message) => {
+          console.log('📩 Notification utilisateur reçue:', message.body);
           this.addNotification(message.body);
         });
       }

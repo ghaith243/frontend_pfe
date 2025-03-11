@@ -60,7 +60,7 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
+  
     this.isLoading = true;
     this.userservice.getEmployeeData(token).subscribe(
       (data) => {
@@ -69,21 +69,31 @@ export class DashboardComponent implements OnInit {
         this.role = data.role;
         this.utilisateurId = data.id;
         this.serviceId = data.serviceId;
-
+  
         // Stocker l'ID de l'utilisateur pour la souscription des notifications
         localStorage.setItem('userId', this.utilisateurId.toString());
-
+  
         if (this.role === 'CHEF' && this.serviceId) {
           this.loadCongesByService();
         } else {
           this.getConges();
         }
-
-        // Souscription unique aux notifications
-        this.notificationService.notifications$.subscribe((msgs) => {
-          this.notifications = msgs;
-        });
-
+  
+        // Subscribe to notifications
+        if (this.role === 'CHEF' || this.role === 'ADMIN') {
+          this.notificationService.notifications$.subscribe((msgs) => {
+            console.log('Notifications reçues:', msgs); // Debugging
+            this.notifications = msgs;
+  
+            // Auto-remove notifications after 10 seconds
+            msgs.forEach((_, index) => {
+              setTimeout(() => {
+                this.removeNotification(index);
+              }, 10000);
+            });
+          });
+        }
+  
         this.isLoading = false;
       },
       (error) => {
@@ -93,6 +103,19 @@ export class DashboardComponent implements OnInit {
       }
     );
   }
+
+
+  // Function to manually remove a notification
+  removeNotification(index: number): void {
+    const notificationElements = document.querySelectorAll('.notification');
+    if (notificationElements[index]) {
+      notificationElements[index].classList.add('fade-out'); // Apply fade-out effect
+      setTimeout(() => {
+        this.notifications.splice(index, 1);
+      }, 500); // Wait for animation to finish before removing
+    }
+  }
+  
 
   getConges(): void {
     const token = localStorage.getItem('token');
