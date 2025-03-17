@@ -93,6 +93,13 @@ export class DashboardComponent implements OnInit {
             });
           });
         }
+
+        if (this.role === 'EMPLOYE') {
+          this.notificationService.notifications$.subscribe((msgs) => {
+            console.log('Notifications reçues (EMPLOYE):', msgs);
+            this.notifications = msgs;
+          });
+        }
   
         this.isLoading = false;
       },
