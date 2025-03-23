@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
+import { NotificationComponent } from './components/notification/notification.component';
 
 export const routes: Routes = [
   {
@@ -63,5 +64,19 @@ export const routes: Routes = [
       title: 'Register Page'
     }
   },
-  { path: '**', redirectTo: 'dashboard' }
+  {
+    path: 'notification',
+    loadComponent: () => import('./components/notification/notification.component').then(m => m.NotificationComponent),
+    data: {
+      title: 'notification Page'
+    }},
+    {
+      path: 'profile',
+      loadComponent: () => import('./components/profile/profile.component').then(m => m.ProfileComponent),
+      data: {
+        title: 'profile Page'
+      }},
+  { path: '**', redirectTo: 'dashboard' },
+  
+ 
 ];

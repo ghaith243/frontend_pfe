@@ -1,6 +1,8 @@
-import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { Component, computed, inject, input, OnInit, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import {
   AvatarComponent,
@@ -23,15 +25,24 @@ import {
 } from '@coreui/angular';
 
 import { IconDirective } from '@coreui/icons-angular';
-import { AuthService } from 'app/services/authservice.service';
-@Component({
-    selector: 'app-default-header',
-    templateUrl: './default-header.component.html',
-  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective]
-})
-export class DefaultHeaderComponent extends HeaderComponent {
+import { NotificationsService } from 'app/services/notifications.service';
+import { ProfileService } from 'app/services/profile.service';
 
-  user: any = null; 
+@Component({
+  selector: 'app-default-header',
+  templateUrl: './default-header.component.html',
+  imports: [
+    FormsModule, CommonModule, ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective,
+    HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet,
+    BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective,
+    DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective
+  ]
+})
+export class DefaultHeaderComponent extends HeaderComponent implements OnInit, OnDestroy {
+  profilePictureUrl: string = '';
+  notifications: any[] = []
+  private subscription!: Subscription;
+  private notificationsSubscription!: Subscription;
   readonly #colorModeService = inject(ColorModeService);
   readonly colorMode = this.#colorModeService.colorMode;
 
@@ -46,23 +57,42 @@ export class DefaultHeaderComponent extends HeaderComponent {
     return this.colorModes.find(mode => mode.name === currentMode)?.icon ?? 'cilSun';
   });
 
- 
-  sidebarId = input('sidebar1');
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(
+    private notificationsService: NotificationsService,
+    private profileService: ProfileService
+  ) {
     super();
   }
 
- // ngOnInit() {
-   // this.loadUser();
-  //}
+  ngOnInit(): void {
+    // 📌 Écoute des notifications stockées + en temps réel
+    this.notificationsSubscription = this.notificationsService.notifications$.subscribe((notifications) => {
+      // Trier pour afficher les nouvelles notifications en premier
+      this.notifications = [...notifications].sort((a, b) => (a.read === b.read ? 0 : a.read ? 1 : -1));
+    });
 
- /* loadUser() {
-    this.user = this.authService.getUser(); // Charge les infos utilisateur depuis le localStorage
+    const profileSub = this.profileService.profilePictureUrl$.subscribe((url) => {
+      this.profilePictureUrl = url || './assets/images/avatars/8.jpg'; // Image par défaut
+    });
+  
+    this.subscription.add(profileSub);
+  
+
   }
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }*/
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+  get unreadNotificationsCount(): number {
+    return this.notifications.filter(n => !n.read).length;
+  }
+  loadAllNotifications() {
+    this.notificationsService.loadAllNotifications();
+  }
 
-}
+  markAllAsRead() {
+    this.notificationsService.markAllAsRead();
+  }
+  sidebarId = input('sidebar1');
+ 
+  }

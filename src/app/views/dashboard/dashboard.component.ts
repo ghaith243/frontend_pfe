@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CongesService } from '../../services/conges.service';
 import { UserserviceService } from '../../services/userservice.service';
@@ -16,18 +16,19 @@ import dayGridPlugin from '@fullcalendar/daygrid';
   standalone: true,
   imports: [FormsModule, CommonModule, FullCalendarModule]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
   user: any = {};
   userConges: any[] = [];
   serviceConges: any[] = [];
   filteredConges: any[] = [];
-  notifications: string[] = [];
+  notifications: any[] = [];
   conge = {
     dateDebut: '',
     dateFin: '',
     motif: '',
     type: ''
   };
+  
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
     plugins: [dayGridPlugin],
@@ -39,6 +40,7 @@ export class DashboardComponent implements OnInit {
     },
     events: []
   };
+  
   utilisateurId: number = 0;
   errorMessage: string = '';
   successMessage: string = '';
@@ -48,6 +50,7 @@ export class DashboardComponent implements OnInit {
   selectedStatus: string = 'TOUS';
 
   constructor(
+    private cdRef: ChangeDetectorRef,
     private userservice: UserserviceService,
     private router: Router,
     private congeservice: CongesService,
@@ -60,7 +63,7 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-  
+
     this.isLoading = true;
     this.userservice.getEmployeeData(token).subscribe(
       (data) => {
@@ -69,38 +72,27 @@ export class DashboardComponent implements OnInit {
         this.role = data.role;
         this.utilisateurId = data.id;
         this.serviceId = data.serviceId;
-  
-        // Stocker l'ID de l'utilisateur pour la souscription des notifications
+
         localStorage.setItem('userId', this.utilisateurId.toString());
-  
+
         if (this.role === 'CHEF' && this.serviceId) {
           this.loadCongesByService();
         } else {
           this.getConges();
         }
-  
-        // Subscribe to notifications
-        if (this.role === 'CHEF' || this.role === 'ADMIN') {
-          this.notificationService.notifications$.subscribe((msgs) => {
-            console.log('Notifications reçues:', msgs); // Debugging
-            this.notifications = msgs;
-  
-            // Auto-remove notifications after 10 seconds
-            msgs.forEach((_, index) => {
-              setTimeout(() => {
-                this.removeNotification(index);
-              }, 10000);
-            });
-          });
-        }
 
-        if (this.role === 'EMPLOYE') {
-          this.notificationService.notifications$.subscribe((msgs) => {
-            console.log('Notifications reçues (EMPLOYE):', msgs);
-            this.notifications = msgs;
+        // Subscription aux notifications
+        this.notificationService.notifications$.subscribe((msgs) => {
+          console.log('Notifications reçues:', msgs);
+          this.notifications = msgs.filter(notification => !notification.read);
+          this.cdRef.detectChanges(); // Détection des changements manuelle
+
+          // Auto-suppression après 10 secondes
+          this.notifications.forEach((_, index) => {
+            setTimeout(() => this.removeNotification(index), 10000);
           });
-        }
-  
+        });
+
         this.isLoading = false;
       },
       (error) => {
@@ -111,18 +103,21 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+  ngAfterViewInit(): void {
+    this.cdRef.detectChanges();
+  }
 
-  // Function to manually remove a notification
+  // Fonction pour supprimer une notification avec animation
   removeNotification(index: number): void {
     const notificationElements = document.querySelectorAll('.notification');
     if (notificationElements[index]) {
-      notificationElements[index].classList.add('fade-out'); // Apply fade-out effect
+      notificationElements[index].classList.add('fade-out'); // Animation CSS
       setTimeout(() => {
         this.notifications.splice(index, 1);
-      }, 500); // Wait for animation to finish before removing
+        this.cdRef.detectChanges();
+      }, 500);
     }
   }
-  
 
   getConges(): void {
     const token = localStorage.getItem('token');
@@ -214,7 +209,6 @@ export class DashboardComponent implements OnInit {
       this.isLoading = false;
     });
   }
-
   approveOrRejectConge(congeId: number, status: string): void {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -234,7 +228,6 @@ export class DashboardComponent implements OnInit {
       this.isLoading = false;
     });
   }
-
   filterCongesByStatus(): void {
     this.filteredConges = this.selectedStatus === 'TOUS'
       ? this.serviceConges

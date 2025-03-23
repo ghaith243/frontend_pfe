@@ -1,0 +1,25 @@
+<div class="profile-container">
+    <div class="profile-picture">
+      <img [src]="profilePictureUrl || './assets/images/avatars/8.jpg'" alt="Photo de profil" class="rounded-circle" width="150">
+    </div>
+    <input type="file" (change)="onFileSelected($event)">
+  </div>
+  <form (submit)="updateEmployee(user)">
+    <label>Email :</label>
+    <input type="email" [(ngModel)]="user.email" name="email" required />
+  
+    <label>Nom :</label>
+    <input type="text" [(ngModel)]="user.nom" name="nom" required />
+  
+    <label>Prénom :</label>
+    <input type="text" [(ngModel)]="user.enfantcount" name="enfantcount" required />
+  
+
+  
+    <button type="submit">Mettre à jour</button>
+  </form>
+  <app-notification>
+    
+  </app-notification>
+  
+  
