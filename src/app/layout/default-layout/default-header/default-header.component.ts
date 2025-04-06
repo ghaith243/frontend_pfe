@@ -1,7 +1,7 @@
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import {
@@ -27,6 +27,7 @@ import {
 import { IconDirective } from '@coreui/icons-angular';
 import { NotificationsService } from 'app/services/notifications.service';
 import { ProfileService } from 'app/services/profile.service';
+import { AuthService } from 'app/services/authservice.service';
 
 @Component({
   selector: 'app-default-header',
@@ -35,7 +36,7 @@ import { ProfileService } from 'app/services/profile.service';
     FormsModule, CommonModule, ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective,
     HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet,
     BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective,
-    DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective
+    DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, RouterModule,RouterLink
   ]
 })
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit, OnDestroy {
@@ -59,9 +60,10 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
 
   constructor(
     private notificationsService: NotificationsService,
-    private profileService: ProfileService
+    private profileService: ProfileService,private authService: AuthService,private router:Router
   ) {
     super();
+    this.subscription = new Subscription();
   }
 
   ngOnInit(): void {
@@ -93,6 +95,10 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
   markAllAsRead() {
     this.notificationsService.markAllAsRead();
   }
+  logout() {
+    
+    this.authService.logout();
+}
   sidebarId = input('sidebar1');
  
   }

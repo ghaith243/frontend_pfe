@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NotificationComponent } from "../notification/notification.component";
 @Component({
   selector: 'app-profile',
+  standalone: true, 
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
   imports: [FormsModule, NotificationComponent]

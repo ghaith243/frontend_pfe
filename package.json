@@ -20,7 +20,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.1.4",
-    "@angular/cdk": "^19.1.2",
+    "@angular/cdk": "^19.2.7",
     "@angular/common": "^19.1.4",
     "@angular/compiler": "^19.1.4",
     "@angular/core": "^19.1.4",
@@ -41,9 +41,12 @@
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@stomp/stompjs": "^7.0.0",
-    "chart.js": "^4.4.7",
+    "@swimlane/ngx-charts": "^22.0.0-alpha.1",
+    "@types/chart.js": "^2.9.41",
+    "chart.js": "^4.4.8",
     "coreui-free-angular-admin-template": "file:",
     "lodash-es": "^4.17.21",
+    "ng2-charts": "^5.0.4",
     "ngx-scrollbar": "^13.0.3",
     "rxjs": "~7.8.1",
     "sockjs-client": "^1.6.1",
@@ -56,6 +59,9 @@
     "@angular/compiler-cli": "^19.1.4",
     "@angular/localize": "^19.1.4",
     "@types/chai": "^5.0.1",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-shape": "^3.1.7",
     "@types/jasmine": "^5.1.5",
     "@types/jest": "^29.5.14",
     "@types/lodash-es": "^4.17.12",
@@ -70,7 +76,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "mocha": "^11.1.0",
-    "typescript": "~5.5.4"
+    "typescript": "5.5"
   },
   "engines": {
     "node": "^18.19.1 || ^20.11.1 || ^22.0.0",

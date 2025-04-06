@@ -9,11 +9,13 @@ export interface NavItem {
 export const navItems: Record<string, NavItem[]> = {
   EMPLOYEE: [
     { name: 'Accueil', url: '/dashboard', icon: 'home' },
-    { name: 'Mes congés', url: '/conges', icon: 'calendar' },
+    { name: 'Mes congés', url: '/mesconges', icon: 'calendar' },
+    {name:"demander un conge",url:'/demande',icon:'demande'},
+    {name:"repartition de mes conges",url:'/calendrier',icon:'calendrier'},
   ],
   CHEF: [
     { name: 'Accueil', url: '/dashboard', icon: 'home' },
-    { name: 'Validation des congés', url: '/validation-conges', icon: 'check' },
+    { name: 'Validation des congés', url: '/validation', icon: 'check' },
   ],
   ADMIN: [
     { name: 'Accueil', url: '/dashboard', icon: 'home' },

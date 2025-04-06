@@ -27,8 +27,8 @@ import { HttpClientModule } from '@angular/common/http'; // Import du module Htt
         anchorScrolling: 'enabled'
       }),
       withEnabledBlockingInitialNavigation(),
-      withViewTransitions(),
-      withHashLocation()
+      withViewTransitions()
+     
     ),
     importProvidersFrom(SidebarModule, DropdownModule, HttpClientModule), // Ajout de HttpClientModule ici
     IconSetService,

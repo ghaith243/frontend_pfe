@@ -1,6 +1,12 @@
 import { Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
 import { NotificationComponent } from './components/notification/notification.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { SubmitleaveComponent } from './components/submitleave/submitleave.component';
+import { LeavedecisionComponent } from './components/leavedecision/leavedecision.component';
+import { ListcongesComponent } from './components/listconges/listconges.component';
+import { CalendrierComponent } from './components/calendrier/calendrier.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -10,6 +16,7 @@ export const routes: Routes = [
   },
   {
     path: '',
+    canActivate:[authGuard],
     component: DefaultLayoutComponent,
     data: {
       title: 'Home'
@@ -19,17 +26,18 @@ export const routes: Routes = [
         path: 'dashboard',
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
-      
+      {path:'profile',component:ProfileComponent},
+      {path:'demande',component:SubmitleaveComponent},
+      {path:'validation',component:LeavedecisionComponent},
+      {path:'mesconges',component:ListcongesComponent},
+      {path:'calendrier',component:CalendrierComponent},
      
     
   
     
    
    
-      {
-        path: 'charts',
-        loadChildren: () => import('./views/charts/routes').then((m) => m.routes)
-      },
+    
       {
         path: 'pages',
         loadChildren: () => import('./views/pages/routes').then((m) => m.routes)

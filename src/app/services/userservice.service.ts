@@ -9,7 +9,7 @@ export class UserserviceService {
 
   constructor(private http: HttpClient) {}
 
-  // Méthode pour se connecter
+
  
   // Méthode pour récupérer les données de l'utilisateur
   getEmployeeData(token: string): Observable<any> {

@@ -1,246 +1,270 @@
-import { ChangeDetectorRef, Component, OnInit, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { CongesService } from '../../services/conges.service';
-import { UserserviceService } from '../../services/userservice.service';
-import { NotificationsService } from 'app/services/notifications.service';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { ChartService } from 'app/services/chart.service';
+import { AuthService } from 'app/services/authservice.service';
+import { Chart, ChartType, ChartConfiguration } from 'chart.js';
+import { NgChartsModule } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
-import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule, FullCalendarModule]
+  imports: [CommonModule, NgChartsModule],
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
-  user: any = {};
-  userConges: any[] = [];
-  serviceConges: any[] = [];
-  filteredConges: any[] = [];
-  notifications: any[] = [];
-  conge = {
-    dateDebut: '',
-    dateFin: '',
-    motif: '',
-    type: ''
-  };
+export class DashboardComponent implements OnInit {
+  charts: {
+    type: ChartType;
+    title: string;
+    data: ChartConfiguration['data'];
+    options?: ChartConfiguration['options'];
+  }[] = [];
   
-  calendarOptions: CalendarOptions = {
-    initialView: 'dayGridMonth',
-    plugins: [dayGridPlugin],
-    locale: 'fr',
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay'
-    },
-    events: []
-  };
-  
-  utilisateurId: number = 0;
-  errorMessage: string = '';
-  successMessage: string = '';
-  role: string = '';
-  serviceId: number = 0;
-  isLoading: boolean = false;
-  selectedStatus: string = 'TOUS';
+  currentRole: string = '';
+  isLoading: boolean = true;
+  errorMessage: string | null = null;
 
   constructor(
-    private cdRef: ChangeDetectorRef,
-    private userservice: UserserviceService,
-    private router: Router,
-    private congeservice: CongesService,
-    private notificationService: NotificationsService
-  ) {}
+    private statsService: ChartService,
+    private authService: AuthService
+  ) {
+    // Configuration globale de Chart.js
+    Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
+    Chart.defaults.color = '#333';
+  }
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.router.navigate(['/login']);
-      return;
-    }
+    this.loadDashboardData();
+  }
 
+  loadDashboardData(): void {
     this.isLoading = true;
-    this.userservice.getEmployeeData(token).subscribe(
+    this.errorMessage = null;
+    this.currentRole = this.authService.getUserRole();
+
+    /*if (this.currentRole === 'ADMIN') {
+      this.loadAdminStats();
+    }*/ if (this.currentRole === 'CHEF') {
+      this.loadChefStats();
+    } else if (this.currentRole === 'EMPLOYE') {
+      this.loadEmployeeStats();
+    } else {
+      this.handleError('Rôle non reconnu');
+    }
+  }
+
+  // Fonction pour charger les statistiques de l'admin
+ /* private loadAdminStats(): void {
+    this.statsService.getAdminStats().subscribe(
       (data) => {
-        console.log('Données utilisateur reçues:', data);
-        this.user = data;
-        this.role = data.role;
-        this.utilisateurId = data.id;
-        this.serviceId = data.serviceId;
-
-        localStorage.setItem('userId', this.utilisateurId.toString());
-
-        if (this.role === 'CHEF' && this.serviceId) {
-          this.loadCongesByService();
-        } else {
-          this.getConges();
+        if (data) {
+          this.charts = [
+            {
+              type: 'pie',
+              title: 'Répartition des types de congé',
+              data: {
+                labels: data.typesConge.map((item: { type: string }) => item.type),  // Typage explicite
+                datasets: [
+                  {
+                    data: data.typesConge.map((item: { count: number }) => item.count),  // Typage explicite
+                    backgroundColor: ['#36A2EB', '#FFCE56', '#FF9F40'],
+                    borderWidth: 0,
+                  },
+                ],
+              },
+              options: this.getChartOptions(),
+            },
+            {
+              type: 'bar',
+              title: 'Taux d\'occupation par service',
+              data: {
+                labels: data.occupationParService.map((item: { service: string }) => item.service),  // Typage explicite
+                datasets: [
+                  {
+                    data: data.occupationParService.map((item: { total: number }) => item.total),  // Typage explicite
+                    backgroundColor: '#4BC0C0',
+                  },
+                ],
+              },
+              options: this.getChartOptions(),
+            },
+          ];
         }
+      },
+      (error) => {
+        this.handleError('Erreur lors du chargement des données Admin');
+      }
+    );
+  }*/
 
-        // Subscription aux notifications
-        this.notificationService.notifications$.subscribe((msgs) => {
-          console.log('Notifications reçues:', msgs);
-          this.notifications = msgs.filter(notification => !notification.read);
-          this.cdRef.detectChanges(); // Détection des changements manuelle
+  // Fonction pour charger les statistiques du chef
+   private loadChefStats(): void {
+    this.statsService.getChefStats().subscribe(
+      (data) => {
+        if (data) {
+          this.charts = [
+            {
+              type: 'pie',
+              title: 'Répartition des types de congé (Service)',
+              data: {
+                labels: data.typesCongeService.map((item: { type: string }) => item.type),  // Typage explicite
+                datasets: [
+                  {
+                    data: data.typesCongeService.map((item: { count: number }) => item.count),  // Typage explicite
+                    backgroundColor: ['#36A2EB', '#FFCE56', '#FF9F40'],
+                    borderWidth: 0,
+                  },
+                ],
+              },
+              options: this.getChartOptions(),
+            },
+            {
+              type: 'line',
+              title: 'Demandes mensuelles (Service)',
+              data: {
+                labels: data.demandesMensuelles.map((item: { mois: number }) => `Mois ${item.mois}`),  // Typage explicite
+                datasets: [
+                  {
+                    data: data.demandesMensuelles.map((item: { count: number }) => item.count),  // Typage explicite
+                    backgroundColor: '#FF6384',
+                    borderColor: '#FF6384',
+                    fill: false,
+                  },
+                ],
+              },
+              options: this.getChartOptions(),
+            },
+          ];
+        }
+      },
+      (error) => {
+        this.handleError('Erreur lors du chargement des données Chef');
+      }
+    );
+  }
 
-          // Auto-suppression après 10 secondes
-          this.notifications.forEach((_, index) => {
-            setTimeout(() => this.removeNotification(index), 10000);
+  // Fonction pour charger les statistiques de l'employé
+  private loadEmployeeStats(): void {
+    const userId = this.authService.getUserId();
+    this.statsService.getEmployeStats(userId).subscribe(
+      (data) => {
+        if (data) {
+          const conges = { paid: 0, rtt: 0, sick: 0,sansSolde: 0 };
+          data.soldeConge.forEach((item: { type: string, jours: number }) => {
+            switch (item.type) {
+              case 'Annuelle':
+                conges.paid = item.jours;
+                break;
+              case 'RTT':
+                conges.rtt = item.jours;
+                break;
+              case 'Maladie':
+                conges.sick = item.jours;
+                break;
+                case 'Sans Solde':  // Assurez-vous que le type correspond exactement
+                conges.sansSolde = item.jours;
+                break;
+            }
           });
-        });
-
-        this.isLoading = false;
+  
+          this.charts = [
+            {
+              type: 'pie',
+              title: 'Vos congés utilisés',
+              data: {
+                labels: ['Congés payés', 'RTT', 'Maladie','sans solde'],
+                datasets: [
+                  {
+                    data: [conges.paid, conges.rtt, conges.sick,conges.sansSolde],
+                    backgroundColor: ['#36A2EB', '#9966FF', '#FF9F40','#FF5733'],
+                    borderWidth: 0,
+                  },
+                ],
+              },
+              options: this.getChartOptions(),
+            },
+            {
+              type: 'pie',
+              title: 'Statut des congés',
+              data: {
+                labels: ['Approuvés', 'Rejetés', 'En attente'],
+                datasets: [
+                  {
+                    data: [
+                      data.congesStats.Approuvés,
+                      data.congesStats.Rejetés,
+                      data.congesStats['En attente'],
+                    ],
+                    backgroundColor: ['#4CAF50', '#FF0000', '#FFC107'],
+                    borderWidth: 0,
+                  },
+                ],
+              },
+              options: this.getChartOptions(),
+            },
+          ];
+        }
       },
       (error) => {
-        console.error('Erreur lors de la récupération des données utilisateur', error);
-        this.showError('Erreur lors de la récupération des données utilisateur.');
-        this.isLoading = false;
+        this.handleError('Erreur lors du chargement des données Employé');
       }
     );
   }
-
-  ngAfterViewInit(): void {
-    this.cdRef.detectChanges();
-  }
-
-  // Fonction pour supprimer une notification avec animation
-  removeNotification(index: number): void {
-    const notificationElements = document.querySelectorAll('.notification');
-    if (notificationElements[index]) {
-      notificationElements[index].classList.add('fade-out'); // Animation CSS
-      setTimeout(() => {
-        this.notifications.splice(index, 1);
-        this.cdRef.detectChanges();
-      }, 500);
-    }
-  }
-
-  getConges(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    this.isLoading = true;
-    this.congeservice.getCongesByUtilisateur(this.utilisateurId, token).subscribe(
-      (data) => {
-        this.userConges = data;
-        this.calendarOptions = {
-          ...this.calendarOptions,
-          events: this.userConges.map(conge => ({
-            title: conge.type + ' - ' + conge.motif,
-            start: conge.dateDebut,
-            end: conge.dateFin,
-            color: conge.status === 'APPROUVE' ? 'green' : 'red'
-          }))
-        };
-        this.isLoading = false;
+  
+  // Fonction pour obtenir les options du graphique
+  private getChartOptions(): ChartConfiguration['options'] {
+    const isChef = this.currentRole === 'CHEF';
+    
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: {
+              size: 14,
+              weight: 'bold' as const
+            },
+            padding: 20,
+            usePointStyle: true,
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = Number(context.parsed) || 0;
+              const dataset = context.dataset.data;
+              const total = (dataset as number[]).reduce((a, b) => a + Number(b), 0);
+              const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+              return `${label}: ${value} jours (${percentage}%)`;
+            }
+          },
+          bodyFont: {
+            size: 14,
+            weight: 'bold' as const
+          },
+          padding: 12
+        }
       },
-      (error) => {
-        console.error('Erreur lors de la récupération des congés', error);
-        this.showError('Erreur lors de la récupération des congés.');
-        this.isLoading = false;
+      // Correction: placez cutout dans elements.arc
+      elements: {
+        arc: {
+          borderWidth: 0,
+          ...(isChef && { cutout: '70%' }) // Uniquement pour les doughnuts
+        }
       }
-    );
+    };
   }
 
-  loadCongesByService(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    this.isLoading = true;
-    this.congeservice.getCongesByService(this.serviceId, token).subscribe(
-      (data) => {
-        console.log('Données reçues pour le service:', data);
-        this.serviceConges = data;
-        this.filteredConges = [...data];
-        this.isLoading = false;
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des congés du service', error);
-        this.showError('Erreur lors de la récupération des congés du service.');
-        this.isLoading = false;
-      }
-    );
-  }
-
-  soumettreConge(): void {
-    if (!this.conge.dateDebut.trim() || !this.conge.dateFin.trim() ||
-        !this.conge.type.trim() || !this.conge.motif.trim()) {
-      this.showError('Veuillez remplir tous les champs.');
-      return;
-    }
-
-    const dateDebut = new Date(this.conge.dateDebut);
-    const dateFin = new Date(this.conge.dateFin);
-    const dateActuelle = new Date();
-
-    if (dateDebut < dateActuelle) {
-      this.showError('La date de début ne peut pas être antérieure à aujourd\'hui.');
-      return;
-    }
-
-    if (dateDebut > dateFin) {
-      this.showError('La date de début doit être antérieure à la date de fin.');
-      return;
-    }
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.showError('Utilisateur non authentifié.');
-      return;
-    }
-
-    this.isLoading = true;
-    this.congeservice.submitCongeRequest(this.conge, token).subscribe(
-      (response) => {
-        console.log('Réponse du serveur:', response);
-        this.showSuccess('Demande de congé soumise avec succès !');
-        this.conge = { type: '', dateDebut: '', dateFin: '', motif: '' };
-        this.getConges();
-      },
-      (error) => {
-        console.error('Erreur lors de la soumission de la demande de congé', error);
-        this.showError('Une erreur est survenue lors de la soumission.');
-      }
-    ).add(() => {
-      this.isLoading = false;
-    });
-  }
-  approveOrRejectConge(congeId: number, status: string): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    this.isLoading = true;
-    this.congeservice.updateCongeStatus(congeId, status, token).subscribe(
-      (response) => {
-        console.log('Réponse serveur:', response);
-        this.showSuccess('Le statut du congé a été mis à jour.');
-        this.loadCongesByService();
-      },
-      (error) => {
-        console.error('Erreur lors de la mise à jour du statut', error);
-        this.showError('Erreur lors de la mise à jour du statut.');
-      }
-    ).add(() => {
-      this.isLoading = false;
-    });
-  }
-  filterCongesByStatus(): void {
-    this.filteredConges = this.selectedStatus === 'TOUS'
-      ? this.serviceConges
-      : this.serviceConges.filter(conge => conge.status === this.selectedStatus);
-  }
-
-  showError(message: string): void {
+  // Fonction pour gérer les erreurs
+  private handleError(message: string): void {
     this.errorMessage = message;
-    setTimeout(() => this.errorMessage = '', 5000);
+    this.isLoading = false;
+ 
   }
-
-  showSuccess(message: string): void {
-    this.successMessage = message;
-    setTimeout(() => this.successMessage = '', 5000);
+  refreshData(): void {
+    this.loadDashboardData();
   }
 }
