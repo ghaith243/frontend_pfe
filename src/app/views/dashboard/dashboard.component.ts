@@ -18,7 +18,23 @@ export class DashboardComponent implements OnInit {
     title: string;
     data: ChartConfiguration['data'];
     options?: ChartConfiguration['options'];
+
   }[] = [];
+  // Ajoutez ces variables dans votre classe
+employeeStats = {
+  totalConges: 0,
+  approuves: 0,
+  rejetes: 0,
+  enAttente: 0
+};
+
+chefStats = {
+  totalCongesService: 0,
+  approuvesService: 0,
+  rejetesService: 0,
+  enAttenteService: 0,
+  demandesCeMois: 0
+};
   
   currentRole: string = '';
   isLoading: boolean = true;
@@ -98,46 +114,80 @@ export class DashboardComponent implements OnInit {
   }*/
 
   // Fonction pour charger les statistiques du chef
-   private loadChefStats(): void {
+  private loadChefStats(): void {
     this.statsService.getChefStats().subscribe(
       (data) => {
-        if (data) {
-          this.charts = [
-            {
+        this.isLoading = false;
+        
+        if (!data) {
+          this.handleError('Aucune donnée reçue');
+          return;
+        }
+  
+        try {
+          // Initialisation des valeurs par défaut pour éviter les erreurs
+          const safeData = {
+            typesCongeService: data.typesCongeService || [],
+            demandesMensuelles: data.demandesMensuelles || [],
+            congesStats: data.congesStats || { Approuvés: 0, Rejetés: 0, 'En attente': 0 }
+          };
+  
+          // Calcul des totaux pour les cartes
+          this.chefStats.totalCongesService = safeData.typesCongeService.reduce((acc: number, item: any) => acc + (item.count || 0), 0);
+          this.chefStats.approuvesService = safeData.congesStats.Approuvés || 0;
+          this.chefStats.rejetesService = safeData.congesStats.Rejetés || 0;
+          this.chefStats.enAttenteService = safeData.congesStats['En attente'] || 0;
+          
+          const currentMonth = new Date().getMonth() + 1;
+          this.chefStats.demandesCeMois = safeData.demandesMensuelles
+            .find((item: any) => item.mois === currentMonth)?.count || 0;
+  
+          // Création des graphiques seulement si les données nécessaires existent
+          this.charts = [];
+          
+          if (safeData.typesCongeService.length > 0) {
+            this.charts.push({
               type: 'pie',
               title: 'Répartition des types de congé (Service)',
               data: {
-                labels: data.typesCongeService.map((item: { type: string }) => item.type),  // Typage explicite
-                datasets: [
-                  {
-                    data: data.typesCongeService.map((item: { count: number }) => item.count),  // Typage explicite
-                    backgroundColor: ['#36A2EB', '#FFCE56', '#FF9F40'],
-                    borderWidth: 0,
-                  },
-                ],
+                labels: safeData.typesCongeService.map((item: any) => item.type || 'Inconnu'),
+                datasets: [{
+                  data: safeData.typesCongeService.map((item: any) => item.count || 0),
+                  backgroundColor: ['#36A2EB', '#FFCE56', '#FF9F40', '#4BC0C0', '#9966FF'],
+                  borderWidth: 0,
+                }],
               },
               options: this.getChartOptions(),
-            },
-            {
+            });
+          }
+  
+          if (safeData.demandesMensuelles.length > 0) {
+            this.charts.push({
               type: 'line',
               title: 'Demandes mensuelles (Service)',
               data: {
-                labels: data.demandesMensuelles.map((item: { mois: number }) => `Mois ${item.mois}`),  // Typage explicite
-                datasets: [
-                  {
-                    data: data.demandesMensuelles.map((item: { count: number }) => item.count),  // Typage explicite
-                    backgroundColor: '#FF6384',
-                    borderColor: '#FF6384',
-                    fill: false,
-                  },
-                ],
+                labels: safeData.demandesMensuelles.map((item: any) => `Mois ${item.mois}`),
+                datasets: [{
+                  data: safeData.demandesMensuelles.map((item: any) => item.count || 0),
+                  backgroundColor: '#FF6384',
+                  borderColor: '#FF6384',
+                  fill: false,
+                }],
               },
               options: this.getChartOptions(),
-            },
-          ];
+            });
+          }
+  
+          if (this.charts.length === 0) {
+            this.handleError('Aucune donnée valide pour créer les graphiques');
+          }
+        } catch (error) {
+          console.error('Erreur de traitement des données:', error);
+          this.handleError('Erreur de format des données');
         }
       },
       (error) => {
+        this.isLoading = false;
         this.handleError('Erreur lors du chargement des données Chef');
       }
     );
@@ -149,6 +199,11 @@ export class DashboardComponent implements OnInit {
     this.statsService.getEmployeStats(userId).subscribe(
       (data) => {
         if (data) {
+          // Calcul des totaux pour les cartes
+          this.employeeStats.totalConges = data.soldeConge.reduce((acc: number, item: { jours: number }) => acc + item.jours, 0);
+          this.employeeStats.approuves = data.congesStats.Approuvés || 0;
+          this.employeeStats.rejetes = data.congesStats.Rejetés || 0;
+          this.employeeStats.enAttente = data.congesStats['En attente'] || 0;
           const conges = { paid: 0, rtt: 0, sick: 0,sansSolde: 0 };
           data.soldeConge.forEach((item: { type: string, jours: number }) => {
             switch (item.type) {

@@ -6,30 +6,94 @@
     </button>
   </div>
 
+  <!-- Cartes statistiques pour l'employé -->
+  <div *ngIf="currentRole === 'EMPLOYE'" class="stats-cards">
+    <div class="stat-card">
+      <h3>Total Congés</h3>
+      <p class="stat-value">{{ employeeStats.totalConges }}</p>
+      <p class="stat-label">jours</p>
+    </div>
+    <div class="stat-card">
+      <h3>Approuvés</h3>
+      <p class="stat-value">{{ employeeStats.approuves }}</p>
+      <p class="stat-label">demandes</p>
+    </div>
+    <div class="stat-card">
+      <h3>Rejetés</h3>
+      <p class="stat-value">{{ employeeStats.rejetes }}</p>
+      <p class="stat-label">demandes</p>
+    </div>
+    <div class="stat-card">
+      <h3>En attente</h3>
+      <p class="stat-value">{{ employeeStats.enAttente }}</p>
+      <p class="stat-label">demandes</p>
+    </div>
+  </div>
+
+  <!-- Cartes statistiques pour le chef -->
+  <div *ngIf="currentRole === 'CHEF'" class="stats-cards">
+    <div class="stat-card">
+      <h3>Congés Service</h3>
+      <p class="stat-value">{{ chefStats.totalCongesService }}</p>
+      <p class="stat-label">total</p>
+    </div>
+    <div class="stat-card">
+      <h3>Approuvés</h3>
+      <p class="stat-value">{{ chefStats.approuvesService }}</p>
+      <p class="stat-label">demandes</p>
+    </div>
+    <div class="stat-card">
+      <h3>Rejetés</h3>
+      <p class="stat-value">{{ chefStats.rejetesService }}</p>
+      <p class="stat-label">demandes</p>
+    </div>
+    <div class="stat-card">
+      <h3>En attente</h3>
+      <p class="stat-value">{{ chefStats.enAttenteService }}</p>
+      <p class="stat-label">demandes</p>
+    </div>
+    <div class="stat-card">
+      <h3>Demandes ce mois</h3>
+      <p class="stat-value">{{ chefStats.demandesCeMois }}</p>
+      <p class="stat-label">ce mois</p>
+    </div>
+  </div>
+
+  <!-- Indicateur de chargement -->
   @if (isLoading) {
     <div class="loading-spinner">
       <i class="fas fa-spinner fa-spin"></i> Chargement des données...
     </div>
   }
 
+  <!-- Message d'erreur -->
   @if (errorMessage) {
     <div class="error-message">
       <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
     </div>
   }
 
+  <!-- Conteneur des graphiques -->
   <div class="charts-grid">
-    @for (chart of charts; track chart.title) {
-      <div class="chart-card">
-        <h3>{{ chart.title }}</h3>
-        <div class="chart-container">
-          <canvas baseChart
-            [type]="chart.type"
-            [data]="chart.data"
-            [options]="chart.options">
-          </canvas>
+    @if (charts.length > 0) {
+      @for (chart of charts; track chart.title) {
+        <div class="chart-card">
+          <h3>{{ chart.title }}</h3>
+          <div class="chart-container">
+            <canvas baseChart
+              [type]="chart.type"
+              [data]="chart.data"
+              [options]="chart.options">
+            </canvas>
+          </div>
         </div>
-      </div>
+      }
+    } @else {
+      @if (!isLoading && !errorMessage) {
+        <div class="no-data-message">
+          <i class="fas fa-chart-pie"></i> Aucune donnée disponible pour les graphiques
+        </div>
+      }
     }
   </div>
 </div>
