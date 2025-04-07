@@ -200,7 +200,7 @@ chefStats = {
       (data) => {
         if (data) {
           // Calcul des totaux pour les cartes
-          this.employeeStats.totalConges = data.soldeConge.reduce((acc: number, item: { jours: number }) => acc + item.jours, 0);
+          this.employeeStats.totalConges = data.congesStats.Approuvés+data.congesStats.Rejetés +data.congesStats['En attente'] || 0;
           this.employeeStats.approuves = data.congesStats.Approuvés || 0;
           this.employeeStats.rejetes = data.congesStats.Rejetés || 0;
           this.employeeStats.enAttente = data.congesStats['En attente'] || 0;
