@@ -13,7 +13,8 @@ export class CongesService {
 
   submitCongeRequest(conge: any, token: string): Observable<any> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post(`${this.apiUrl}/conges/demande`, conge, { headers });
+    return this.http.post(`${this.apiUrl}/conges/demande`, conge, { headers, responseType: 'text' });
+
   }
 
   getCongesByUtilisateur(utilisateurId: number, token: string): Observable<any> {
@@ -36,7 +37,7 @@ export class CongesService {
   updateCongeStatus(congeId: number, status: string, token: string): Observable<any> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     const body = { status }; // statut 'APPROUVE' ou 'REJETE'
-    return this.http.put(`${this.apiUrl}/conges/${congeId}/status`, body, { headers });
+    return this.http.put(`${this.apiUrl}/conges/${congeId}/status`, body, {  headers,responseType: 'text'});
   }
   
 }

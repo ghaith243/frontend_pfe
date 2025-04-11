@@ -42,8 +42,9 @@ export class NotificationsService {
 
       // Abonnement aux notifications générales
       this.stompClient.subscribe('/topic/notifications', (message) => {
-        console.log('📩 Notification générale reçue:', message.body);
-        this.addNotification(message.body);
+        const notification = JSON.parse(message.body);
+        console.log('📩 Notification générale reçue:', notification);
+        this.addNotification(notification);
       });
 
       // Abonnement aux notifications pour l'utilisateur spécifique

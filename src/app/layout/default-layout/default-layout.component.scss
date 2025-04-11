@@ -1,24 +1,59 @@
 :host {
+  // Scrollbar
   .ng-scrollbar {
     --scrollbar-padding: 1px;
     --scrollbar-size: 5px;
-    --scrollbar-thumb-color: var(--cui-gray-500, #fff6f6);
-    --scrollbar-thumb-hover-color: var(--cui-gray-400, #f6eded);
+    --scrollbar-thumb-color: #555555; // Gris du logo
+    --scrollbar-thumb-hover-color: #0066B3; // Bleu du logo
     --scrollbar-hover-size: calc(var(--scrollbar-size) * 1.5);
+  }
+
+  // Sidebar color
+  .sidebar {
+    background-color: #ffffff !important; // fond blanc
+    color: #333 !important;
+
+    .c-sidebar-nav-link {
+      color: #333 !important;
+      font-weight: 500;
+
+      &:hover {
+        background-color: #f0f8ff !important; // bleu très clair
+        color: #007bff !important; // bleu vif
+        transition: all 0.2s ease-in-out;
+      }
+
+      &.active {
+        background-color: #e6f0ff !important; // bleu un peu plus visible
+        color: #0056b3 !important;
+        border-left: 4px solid #007bff;
+      }
+    }
+
+    .c-sidebar-nav-title {
+      color: #999;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+  }
+  // Header/Footer
+  .header, .footer {
+    background-color: #ffffff;
+    border-bottom: 2px solid #0066B3;
+  }
+  .btn-primary {
+  background-color: #0066B3;
+  border-color: #0066B3;
+  &:hover {
+    background-color: darken(#0066B3, 10%);
+    border-color: darken(#0066B3, 10%);
   }
 }
 
-// ng-scrollbar css variables
-//.cui-scrollbar {
-//  --scrollbar-border-radius: 7px;
-//  --scrollbar-padding: 1px;
-//  --scrollbar-viewport-margin: 0;
-//  --scrollbar-track-color: transparent;
-//  --scrollbar-wrapper-color: transparent;
-//  --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
-//  --scrollbar-thumb-hover-color: var(--scrollbar-thumb-color);
-//  --scrollbar-size: 5px;
-//  --scrollbar-hover-size: var(--scrollbar-size);
-//  --scrollbar-thumb-transition: height ease-out 150ms, width ease-out 150ms;
-//  --scrollbar-track-transition: height ease-out 150ms, width ease-out 150ms;
-//}
+.btn-warning {
+  background-color: #F5A623;
+  border-color: #F5A623;
+}
+
+}
