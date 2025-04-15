@@ -62,6 +62,13 @@ export class DefaultLayoutComponent implements OnInit {
           this.role = data.role; // Récupérer le rôle de l'utilisateur depuis la réponse de l'API
           console.log('Rôle validé :', this.role);
 
+          if (data.serviceId) {
+            localStorage.setItem('serviceId', data.serviceId.toString());
+            console.log('Service ID stored in localStorage:', data.serviceId);
+          } else {
+            console.warn('Service ID non trouvé dans les données utilisateur');
+          }
+
           // Mettre à jour les éléments de la sidebar en fonction du rôle
           if (this.role) {
             this.navItems = navItems[this.role.toUpperCase()] || navItems['EMPLOYEE'];
