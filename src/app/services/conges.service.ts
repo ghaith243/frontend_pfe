@@ -13,6 +13,8 @@ export class CongesService {
 
   submitCongeRequest(conge: any, token: string): Observable<any> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const response = this.http.post(`${this.apiUrl}/conges/demande`, conge, { headers, responseType: 'text' });
+    console.log(response , "response service");
     return this.http.post(`${this.apiUrl}/conges/demande`, conge, { headers, responseType: 'text' });
 
   }

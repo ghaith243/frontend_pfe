@@ -6,6 +6,7 @@ import { SubmitleaveComponent } from './components/submitleave/submitleave.compo
 import { LeavedecisionComponent } from './components/leavedecision/leavedecision.component';
 import { ListcongesComponent } from './components/listconges/listconges.component';
 import { CalendrierComponent } from './components/calendrier/calendrier.component';
+import { MessagerieComponent } from './components/messagerie/messagerie.component';
 import { authGuard } from './guards/auth.guard';
 import { AbsencesComponent } from './components/absences/absences.component';
 import { EmployeAbsenceComponent } from './components/absences/employe-absence/employe-absence.component';
@@ -29,6 +30,7 @@ export const routes: Routes = [
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
       {path:'profile',component:ProfileComponent},
+      {path:'messagerie', component: MessagerieComponent },
       {path:'demande',component:SubmitleaveComponent},
       {path:'validation',component:LeavedecisionComponent},
       {path:'mesconges',component:ListcongesComponent},
