@@ -29,7 +29,6 @@ import { UserserviceService } from 'app/services/userservice.service';
     SidebarHeaderComponent,
     SidebarBrandComponent,
     RouterLink,
-    IconDirective,
     NgScrollbar,
     SidebarNavComponent,
     SidebarFooterComponent,

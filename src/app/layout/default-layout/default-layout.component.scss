@@ -1,3 +1,4 @@
+@use "sass:color";
 :host {
   // Scrollbar
   .ng-scrollbar {
@@ -43,13 +44,13 @@
     border-bottom: 2px solid #0066B3;
   }
   .btn-primary {
-  background-color: #0066B3;
-  border-color: #0066B3;
-  &:hover {
-    background-color: darken(#0066B3, 10%);
-    border-color: darken(#0066B3, 10%);
+    background-color: #0066B3;
+    border-color: #0066B3;
+    &:hover {
+      background-color: color.adjust(#0066B3, $lightness: -10%);
+      border-color: color.adjust(#0066B3, $lightness: -10%);
+    }
   }
-}
 
 .btn-warning {
   background-color: #F5A623;
