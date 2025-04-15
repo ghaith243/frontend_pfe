@@ -30,9 +30,7 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
 
   constructor(private chatService: ChatService) {}
 
-  ngAfterViewChecked(): void {
-
-  }
+  ngAfterViewChecked(): void {}
 
   scrollToBottom(force: boolean = false): void {
     const el = this.messagesContainer.nativeElement;
