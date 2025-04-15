@@ -1,56 +1,42 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { Client, Message, Stomp } from '@stomp/stompjs';
+import { Client, Message } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ChatService {
-  private stompClient!: Client;
-  private messageSubject = new Subject<string>(); // Observable for received messages
-  private serverUrl = 'http://localhost:8092/ws'; // Adjust if necessary
+  private stompClient: Client;
+  private messageSubject = new BehaviorSubject<any>(null);
 
-  constructor() {
-    this.connect();
-  }
+  public message$ = this.messageSubject.asObservable();
 
-  private connect(): void {
-    const socket = new SockJS(this.serverUrl);
-    this.stompClient = Stomp.over(socket);
+  constructor(private http: HttpClient) {
+    this.stompClient = new Client({
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      reconnectDelay: 5000,
+    });
 
     this.stompClient.onConnect = () => {
-      console.log('Connected to WebSocket');
-      
-      // Subscribe to receive messages
       this.stompClient.subscribe('/topic/messages', (message: Message) => {
-        this.messageSubject.next(message.body);
+        this.messageSubject.next(JSON.parse(message.body));
       });
     };
 
-    this.stompClient.activate(); // Connect to WebSocket
+    this.stompClient.activate();
   }
 
-  sendMessage(senderId: number, receiverId: number, content: string): void {
-    if (this.stompClient && this.stompClient.connected) {
-      const chatMessage = { senderId, receiverId, content };
-      this.stompClient.publish({
-        destination: '/app/chat',
-        body: JSON.stringify(chatMessage),
-      });
-    } else {
-      console.error('WebSocket is not connected.');
-    }
+  sendMessage(message: any) {
+    return this.http.post('http://localhost:8092/api/send', message);
   }
 
-  getMessages(): Observable<string> {
-    return this.messageSubject.asObservable();
+  getChatHistory(sender: string, recipient: string) {
+    return this.http.get<any[]>(`http://localhost:8092/api/messages/${sender}/${recipient}`);
   }
 
-  disconnect(): void {
-    if (this.stompClient) {
-      this.stompClient.deactivate();
-      console.log('Disconnected from WebSocket');
-    }
+  getUsers() {
+    return this.http.get<any[]>('http://localhost:8092/employee/users');
   }
 }

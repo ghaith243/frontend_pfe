@@ -58,19 +58,18 @@ chefStats = {
     this.errorMessage = null;
     this.currentRole = this.authService.getUserRole();
 
-    /*if (this.currentRole === 'ADMIN') {
+    if (this.currentRole === 'ADMIN') {
       this.loadAdminStats();
-    }*/ if (this.currentRole === 'CHEF') {
+    } if (this.currentRole === 'CHEF') {
       this.loadChefStats();
     } else if (this.currentRole === 'EMPLOYE') {
       this.loadEmployeeStats();
-    } else {
-      this.handleError('Rôle non reconnu');
-    }
+    } 
+   
   }
 
   // Fonction pour charger les statistiques de l'admin
- /* private loadAdminStats(): void {
+ private loadAdminStats(): void {
     this.statsService.getAdminStats().subscribe(
       (data) => {
         if (data) {
@@ -111,7 +110,8 @@ chefStats = {
         this.handleError('Erreur lors du chargement des données Admin');
       }
     );
-  }*/
+  }
+
 
   // Fonction pour charger les statistiques du chef
   private loadChefStats(): void {

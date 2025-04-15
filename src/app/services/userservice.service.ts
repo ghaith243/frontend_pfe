@@ -16,5 +16,8 @@ export class UserserviceService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get(`${this.apiUrl}/employee/me`, { headers });
   }
+  getAllEmployes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/employee/users`);
+  }
 
 }

@@ -7,6 +7,8 @@ import { LeavedecisionComponent } from './components/leavedecision/leavedecision
 import { ListcongesComponent } from './components/listconges/listconges.component';
 import { CalendrierComponent } from './components/calendrier/calendrier.component';
 import { authGuard } from './guards/auth.guard';
+import { AbsencesComponent } from './components/absences/absences.component';
+import { EmployeAbsenceComponent } from './components/absences/employe-absence/employe-absence.component';
 
 export const routes: Routes = [
   {
@@ -31,6 +33,8 @@ export const routes: Routes = [
       {path:'validation',component:LeavedecisionComponent},
       {path:'mesconges',component:ListcongesComponent},
       {path:'calendrier',component:CalendrierComponent},
+      {path:'absences',component:AbsencesComponent},
+      {path:'mesabsences',component:EmployeAbsenceComponent},
      
     
   
@@ -78,12 +82,14 @@ export const routes: Routes = [
     data: {
       title: 'notification Page'
     }},
+   
     {
       path: 'profile',
       loadComponent: () => import('./components/profile/profile.component').then(m => m.ProfileComponent),
       data: {
         title: 'profile Page'
       }},
+    
   { path: '**', redirectTo: 'dashboard' },
   
  

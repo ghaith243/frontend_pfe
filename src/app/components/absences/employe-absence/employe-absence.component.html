@@ -1,0 +1,30 @@
+<div class="card">
+    <div class="card-header">
+      <h4>Mes absences</h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered" *ngIf="absences.length > 0; else noAbsences">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Motif</th>
+            <th>Justifiée</th>
+            <th>Chef</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let absence of absences">
+            <td>{{ absence.date }}</td>
+            <td>{{ absence.motif }}</td>
+            <td>{{ absence.justifiee ? 'Oui' : 'Non' }}</td>
+            <td>{{ absence.chef?.nom }}</td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <ng-template #noAbsences>
+        <p>Aucune absence trouvée.</p>
+      </ng-template>
+    </div>
+  </div>
+  
