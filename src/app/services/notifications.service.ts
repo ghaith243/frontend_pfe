@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable } from 'rxjs';
-export interface Notification {
+export interface AppNotification {
   id: number;
   message: string;
   createdAt: string; // Date sous forme de string
@@ -74,7 +74,7 @@ export class NotificationsService {
 
   // Récupérer les notifications stockées
   private loadStoredNotifications() {
-    this.http.get<Notification[]>(this.apiUrl, { headers: this.headers }).subscribe({
+    this.http.get<AppNotification[]>(this.apiUrl, { headers: this.headers }).subscribe({
       next: (notifications) => {
         console.log('🔄 Toutes les notifications récupérées:', notifications);
         // Trier : d'abord les non lues, puis les lues
@@ -110,5 +110,9 @@ export class NotificationsService {
     });
   }
 
+  getNotifications(): Observable<AppNotification[]> {
+    return this.http.get<AppNotification[]>(this.apiUrl, { headers: this.headers });
+  }
+  
   
 }

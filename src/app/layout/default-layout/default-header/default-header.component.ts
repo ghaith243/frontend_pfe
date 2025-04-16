@@ -28,6 +28,7 @@ import { IconDirective } from '@coreui/icons-angular';
 import { NotificationsService } from 'app/services/notifications.service';
 import { ProfileService } from 'app/services/profile.service';
 import { AuthService } from 'app/services/authservice.service';
+import { NotificationComponent } from 'app/components/notification/notification.component';
 
 @Component({
   selector: 'app-default-header',
@@ -80,6 +81,24 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
     this.subscription.add(profileSub);
   
 
+  }
+
+  formatNotificationTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    if (date.toDateString() === now.toDateString()) {
+      return `Aujourd'hui à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+
+    if (date.toDateString() === yesterday.toDateString()) {
+      return `Hier à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
   }
 
   ngOnDestroy(): void {

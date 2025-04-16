@@ -38,7 +38,7 @@
     </c-badge>
   </button>
 
-  <ul cDropdownMenu class="w-auto">
+  <ul cDropdownMenu class="w-auto" [ngClass]="{'scrollable-dropdown': notifications.length > 5}">
     <li *ngIf="notifications.length > 0" class="dropdown-header fw-bold d-flex justify-content-between">
       <span>Notifications</span>
       <button class="btn btn-sm btn-link text-decoration-none" (click)="markAllAsRead()">
@@ -48,7 +48,7 @@
 
     <li *ngFor="let notif of notifications" class="dropdown-item"
         [ngClass]="{'fw-bold': !notif.read, 'text-muted': notif.read}">
-      <small>{{ notif.message }}--{{notif.createdAt}}</small>
+      <small>{{ notif.message }} {{ formatNotificationTime(notif.createdAt) }}</small>
     </li>
 
     <li *ngIf="notifications.length === 0" class="dropdown-item text-muted">
