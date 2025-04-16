@@ -16,7 +16,7 @@ export class SubmitleaveComponent   {
     dateDebut: '',
     dateFin: '',
     motif: '',
-    type: ''
+    type: '' 
   };
   
   utilisateurId: number = 0;
@@ -54,42 +54,45 @@ export class SubmitleaveComponent   {
       this.showError('Veuillez remplir tous les champs.');
       return;
     }
-
+  
     const dateDebut = new Date(this.conge.dateDebut);
     const dateFin = new Date(this.conge.dateFin);
     const dateActuelle = new Date();
-
-    if (dateDebut < dateActuelle) {
+  
+    /*if (dateDebut < dateActuelle) {
       this.showError('La date de début ne peut pas être antérieure à aujourd\'hui.');
       return;
     }
-
+  */
     if (dateDebut > dateFin) {
       this.showError('La date de début doit être antérieure à la date de fin.');
       return;
     }
-
+  
     const token = localStorage.getItem('token');
     if (!token) {
       this.showError('Utilisateur non authentifié.');
       return;
     }
-
+  
     this.isLoading = true;
     this.congeservice.submitCongeRequest(this.conge, token).subscribe(
       (response) => {
-        console.log('Réponse du serveur:', response);
         this.showSuccess('Demande de congé soumise avec succès !');
-        this.conge = { type: '', dateDebut: '', dateFin: '', motif: '' }; // Réinitialisation du formulaire
+        this.conge = { type: '', dateDebut: '', dateFin: '', motif: ''};
       },
       (error) => {
         console.error('Erreur lors de la soumission de la demande de congé', error);
-        this.showError('Une erreur est survenue lors de la soumission.');
+        const errorMessage = error?.error || 'Une erreur est survenue lors de la soumission.';
+        this.showError(errorMessage); // ➤ On affiche le message retourné par le backend
       }
     ).add(() => {
       this.isLoading = false;
     });
   }
+
+  
+  
 
   showError(message: string): void {
     this.errorMessage = message;

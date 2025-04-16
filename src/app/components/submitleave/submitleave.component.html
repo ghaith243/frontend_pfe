@@ -1,34 +1,61 @@
-`<div class="form-container mb-5">
-    <h3>Soumettre une demande de congé</h3>
-    <form (ngSubmit)="soumettreConge()">
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label for="dateDebut">Date de début:</label>
-          <input type="date" id="dateDebut" [(ngModel)]="conge.dateDebut" name="dateDebut" class="form-control" required>
-        </div>
-        <div class="form-group col-md-6">
-          <label for="dateFin">Date de fin:</label>
-          <input type="date" id="dateFin" [(ngModel)]="conge.dateFin" name="dateFin" class="form-control" required>
-        </div>
+<div class="form-container mb-5">
+  <h3>Soumettre une demande de congé</h3>
+  <form (ngSubmit)="soumettreConge()" #congeForm="ngForm">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="dateDebut">Date de début:</label>
+        <input type="date" id="dateDebut" 
+               [(ngModel)]="conge.dateDebut" 
+               name="dateDebut" 
+               class="form-control" 
+               required>
       </div>
-      <div class="form-group">
-        <label for="type">Type de congé:</label>
-        <select id="type" [(ngModel)]="conge.type" name="type" class="form-control" required>
-          <option value="PAYE">Congé payé</option>
-          <option value="SANS_SOLDE">Sans solde</option>
-          <option value="MALADIE">Maladie</option>
-        </select>
+      <div class="form-group col-md-6">
+        <label for="dateFin">Date de fin:</label>
+        <input type="date" id="dateFin" 
+               [(ngModel)]="conge.dateFin" 
+               name="dateFin" 
+               class="form-control" 
+               required>
       </div>
-      <div class="form-group">
-        <label for="motif">Motif:</label>
-        <textarea id="motif" [(ngModel)]="conge.motif" name="motif" class="form-control" required></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
-        {{ isLoading ? 'Envoi en cours...' : 'Soumettre' }}
-      </button>
-    </form>
-  
-    <!-- Affichage des messages -->
-    <div *ngIf="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
-    <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="type">Type de congé:</label>
+      <select id="type" 
+              [(ngModel)]="conge.type" 
+              name="type" 
+              class="form-control" 
+              required>
+        <option value="" disabled selected>Sélectionnez un type</option>
+        <option value="PAYE">Congé payé</option>
+        <option value="SANS_SOLDE">Sans solde</option>
+        <option value="MALADIE">Maladie</option>
+        <option value="Maternité">Maternité</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="motif">Motif:</label>
+      <textarea id="motif" 
+                [(ngModel)]="conge.motif" 
+                name="motif" 
+                class="form-control" 
+                required
+                rows="3"></textarea>
+    </div>
+    
+    <button type="submit" 
+            class="btn btn-primary" 
+            [disabled]="isLoading || !congeForm.form.valid">
+      {{ isLoading ? 'Envoi en cours...' : 'Soumettre' }}
+    </button>
+  </form>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">
+    {{ successMessage }}
   </div>
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+</div>

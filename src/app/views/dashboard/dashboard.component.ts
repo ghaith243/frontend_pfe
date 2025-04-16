@@ -204,7 +204,7 @@ chefStats = {
           this.employeeStats.approuves = data.congesStats.Approuvés || 0;
           this.employeeStats.rejetes = data.congesStats.Rejetés || 0;
           this.employeeStats.enAttente = data.congesStats['En attente'] || 0;
-          const conges = { paid: 0, rtt: 0, sick: 0,sansSolde: 0 };
+          const conges = { paid: 0, rtt: 0, sick: 0, sansSolde: 0, maternite: 0 };
           data.soldeConge.forEach((item: { type: string, jours: number }) => {
             switch (item.type) {
               case 'Annuelle':
@@ -216,22 +216,28 @@ chefStats = {
               case 'Maladie':
                 conges.sick = item.jours;
                 break;
-                case 'Sans Solde':  // Assurez-vous que le type correspond exactement
+              case 'Sans Solde':
                 conges.sansSolde = item.jours;
+                break;
+              case 'Maternité': // Ajoutez ce cas pour la maternité
+                conges.maternite = item.jours;
+                break;
+              default:
                 break;
             }
           });
+          
   
           this.charts = [
             {
               type: 'pie',
               title: 'Vos congés utilisés',
               data: {
-                labels: ['Congés payés', 'RTT', 'Maladie','sans solde'],
+                labels: ['Congés payés', 'RTT', 'Maladie', 'Sans solde', 'Maternité'], // Ajout de 'Maternité'
                 datasets: [
                   {
-                    data: [conges.paid, conges.rtt, conges.sick,conges.sansSolde],
-                    backgroundColor: ['#36A2EB', '#9966FF', '#FF9F40','#FF5733'],
+                    data: [conges.paid, conges.rtt, conges.sick, conges.sansSolde, conges.maternite], // Ajout de 'conges.maternite'
+                    backgroundColor: ['#36A2EB', '#9966FF', '#FF9F40', '#FF5733', '#FF4081'], // Ajout d'une couleur pour 'Maternité'
                     borderWidth: 0,
                   },
                 ],
