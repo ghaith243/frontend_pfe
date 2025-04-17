@@ -1,7 +1,7 @@
 
 <div class="messagerie-container" style="display: flex; height: 100vh; overflow: hidden; background-color: #f9f9f9;">
   <!-- Left Section: Users List -->
-  <div class="chefs-list" style="width: 250px; background-color: #ffffff; border-right: 1px solid #ddd; padding: 1rem; overflow-y: auto; height: 100%;">
+  <div class="chefs-list">
 
     <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Utilisateurs</h3>
     <ul style="list-style: none; padding: 0;">
@@ -24,12 +24,21 @@
     <div class="chat-header" style="background-color: #007bff; color: white; padding: 0.75rem 1rem; border-radius: 8px 8px 0 0;">
       <h3 style="margin: 0;" *ngIf="recipient">Chat avec {{ getUsernameByEmail(recipient) }}</h3>
       <h3 style="margin: 0;" *ngIf="!recipient">Sélectionnez un utilisateur pour discuter</h3>
+        <!-- Group Button for CHEF and ADMIN -->
+      <button
+        *ngIf="isChefOrAdmin"
+        class="btn btn-sm btn-light"
+        style="font-size: 0.85rem; padding: 0.4rem 0.75rem; border-radius: 20px;"
+        (click)="openCreateGroupChatModal()">
+        + Groupe
+      </button>
     </div>
 
     <div
     class="chat-messages"
     #messagesContainer
     style="flex: 1; display: flex; flex-direction: column-reverse; overflow-y: auto; padding: 1rem; background-color: white; border-left: 1px solid #eee; border-right: 1px solid #eee;"
+    (scroll)="onScroll()"
   >
     <ng-container *ngFor="let msg of messages.slice().reverse(); let i = index; trackBy: trackByMessageId">
   
@@ -43,6 +52,7 @@
   
       <!-- Message -->
       <div
+        [@messageAnimation]
         [ngClass]="{
           'my-message': msg.sender === myUsername,
           'other-message': msg.sender !== myUsername,
@@ -100,13 +110,53 @@
       />
       <button
         (click)="sendMessage()"
-        [disabled]="!recipient"
+        [disabled]="!recipient || !newMessage.trim()"
         style="padding: 0.75rem 1.5rem; background-color: #007bff; color: white; border: none; border-radius: 25px;"
       >
         Envoyer
       </button>
     </div>
   </div>
+
+    <!-- Modal for Creating Group Chat -->
+    <div class="modal fade" #createGroupChatModal tabindex="-1" aria-labelledby="createGroupChatModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createGroupChatModalLabel">Créer un Groupe</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input
+              type="text"
+              [(ngModel)]="groupName"
+              placeholder="Nom du groupe"
+              class="form-control"
+            />
+            <div class="mt-2">
+              <h6>Sélectionner des utilisateurs</h6>
+              <ul style="list-style: none; padding: 0;">
+                <li
+                  *ngFor="let user of users"
+                  style="padding: 0.5rem; cursor: pointer;"
+                >
+                <input
+                  type="checkbox"
+                  [checked]="selectedUserEmails.includes(user.email)"
+                  (change)="onUserCheckboxChange($event, user.email)"
+                />
+                {{ user.name }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeCreateGroupChatModal()">Annuler</button>
+            <button type="button" class="btn btn-primary" (click)="createGroupChat()">Créer le Groupe</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
 
 

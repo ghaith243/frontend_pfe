@@ -34,6 +34,7 @@ export class LoginComponent {
       (response: any) => {
         localStorage.setItem('token', response.token);// Stocker le token JWT
         localStorage.setItem('role', response.role);
+        localStorage.setItem('userEmail', response.email);
         this.router.navigateByUrl('/dashboard');// Rediriger vers le profil
       },
       (error) => {

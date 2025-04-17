@@ -66,4 +66,9 @@ export class AuthService {
     localStorage.removeItem('user');
     this.router.navigate(['/login']);
   }
+
+  isChefOrAdmin(): boolean {
+    const role = this.getUserRole();
+    return role === 'CHEF' || role === 'ADMIN';
+  }
 }

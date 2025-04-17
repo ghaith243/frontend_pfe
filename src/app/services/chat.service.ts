@@ -120,4 +120,36 @@ export class ChatService {
       this.stompClient.deactivate();
     }
   }
+//********************************************************************************************************************************************************************** */
+  // Create group chat
+  createGroupChat(groupName: string, userEmails: string[]): Observable<any> {
+    const body = {
+      groupName,
+      initialParticipants: userEmails
+    };
+    return this.http.post(`${this.baseUrl}/api/group-chats/create`, body, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Get all group chats for the current user
+  // getMyGroupChats(): Observable<any[]> {
+  //   return this.http.get<any[]>(`${this.baseUrl}/api/group-chats/mine`, {
+  //     headers: this.getAuthHeaders()
+  //   });
+  // }
+
+  // Get messages from a specific group
+  getGroupMessages(groupId: number): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.baseUrl}/api/group-chats/${groupId}/messages`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Send message to a group
+  sendGroupMessage(groupId: number, message: ChatMessage): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/group-chats/${groupId}/send`, message, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

@@ -7,16 +7,37 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { interval, Subscription } from 'rxjs';
 import { IMessage } from '@stomp/stompjs';
 import { ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-
+import { AuthService } from '../../services/authservice.service';
+import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition,
+} from '@angular/animations';
 @Component({
   selector: 'app-chat',
   templateUrl: './messagerie.component.html',
   styleUrls: ['./messagerie.component.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule],
+  animations: [
+    trigger('messageAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+    ]),
+  ],
 })
+
+
 export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  @ViewChild('createGroupChatModal') createGroupChatModal!: ElementRef;
+  private shouldScroll = false;
+  isModalOpen = false;
+  isNearBottom =  true;
   messages: ChatMessage[] = [];
   newMessage = '';
   myUsername = localStorage.getItem('username') || 'iyed';
@@ -27,19 +48,61 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   isTyping = false;
   typingTimeout: any;
   private jwtHelper = new JwtHelperService();
+  groupName: string = '';
+  selectedUserIds: number[] = [];
+  selectedUserEmails: string[] = [];
+  groupChats: any[] = [];
+  selectedGroupId: number | null = null;
+  isChefOrAdmin: boolean = false; 
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService , private authService: AuthService) {}
 
-  ngAfterViewChecked(): void {}
+  ngAfterViewChecked(): void {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
+  openCreateGroupChatModal() {
+    const modal = this.createGroupChatModal.nativeElement;
+    modal.classList.add('show');
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';  // Prevent scrolling
+  }
 
-  scrollToBottom(force: boolean = false): void {
-    const el = this.messagesContainer.nativeElement;
+  onUserCheckboxChange(event: any, email: string) {
+    if (event.target.checked) {
+      this.selectedUserEmails.push(email); // Add the email to selected list
+    } else {
+      this.selectedUserEmails = this.selectedUserEmails.filter(
+        (selectedEmail) => selectedEmail !== email
+      ); // Remove the email from selected list
+    }
+  }
   
-    const isNearBottom =
-      el.scrollTop + el.clientHeight >= el.scrollHeight - 100;
-  
-    if (force || isNearBottom) {
-      el.scrollTop = el.scrollHeight;
+  toggleUserSelection(userEmail: string, isChecked: boolean): void {
+    if (isChecked) {
+      this.selectedUserEmails.push(userEmail);
+    } else {
+      this.selectedUserEmails = this.selectedUserEmails.filter(email => email !== userEmail);
+    }
+  }
+
+  closeCreateGroupChatModal() {
+    const modal = this.createGroupChatModal.nativeElement;
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';  // Restore body scroll
+  }
+
+  scrollToBottom(): void {
+    try {
+      setTimeout(() => {
+        const container = this.messagesContainer.nativeElement;
+        container.scrollTop = container.scrollHeight;
+      }, 0); // use 0 for immediate, or 100 if needed
+    } catch (err) {
+      console.error('Scroll error:', err);
     }
   }
   
@@ -48,6 +111,7 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   ngOnInit(): void {
     this.getMyUsername();
     this.connectToWebSocket();
+    this.isChefOrAdmin = this.authService.isChefOrAdmin();
     this.loadUsers();
 
     setInterval(() => this.loadMessages(), 60000);
@@ -77,7 +141,7 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
         (msg.sender === this.myUsername && msg.recipient === this.recipient)
       ) {
         this.messages.push({ ...msg, justArrived: true });
-        setTimeout(() => this.scrollToBottom(), 100);
+        this.shouldScroll = true;
       }
     });
 
@@ -87,16 +151,19 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
         if (data.sender === this.recipient) {
           this.typingUser = data.sender;
           this.isTyping = true;
-
+      
           clearTimeout(this.typingTimeout);
           this.typingTimeout = setTimeout(() => {
             this.isTyping = false;
             this.typingUser = null;
+            this.shouldScroll = true; // trigger scroll after typing bubble disappears
           }, 4000);
         }
       });
     }, 2000); // Wait for WebSocket to connect
   }
+
+  
 
   fetchMessages(recipient: string): void {
     this.chatService.getMessages(this.myUsername, recipient).subscribe((data) => {
@@ -116,40 +183,62 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     });
   }
 
-  sendMessage(): void {
-    if (!this.newMessage.trim() || !this.recipient) return;
+  // loadGroupChats(): void {
+  //   this.chatService.getMyGroupChats().subscribe((chats) => {
+  //     this.groupChats = chats;
+  //   });
+  // }
 
+  sendMessage(): void {
+    if (!this.newMessage.trim()) return;
+  
     const message: ChatMessage = {
       sender: this.myUsername,
-      recipient: this.recipient,
+      recipient: this.recipient!,
       content: this.newMessage,
       timestamp: new Date().toISOString(),
     };
-
-    this.chatService.sendMessage(message).subscribe(() => {
-      message['justArrived'] = true;
-      this.messages.push(message);
-      this.newMessage = '';
-
-      setTimeout(() => {
-        message['justArrived'] = false;
-        this.scrollToBottom();
-      }, 500);
-      
-      this.fetchMessages(this.recipient!);
-      setTimeout(() => this.scrollToBottom(true), 100);
-    });
+  
+    if (this.selectedGroupId) {
+      this.chatService.sendGroupMessage(this.selectedGroupId, message).subscribe(() => {
+        this.messages.push({ ...message, justArrived: true });
+        this.newMessage = '';
+        this.shouldScroll = true;
+      });
+    } else if (this.recipient) {
+      this.chatService.sendMessage(message).subscribe(() => {
+        this.messages.push({ ...message, justArrived: true });
+        this.newMessage = '';
+        this.shouldScroll = true;
+      });
+    }
   }
+  
 
   selectRecipient(user: string): void {
     this.recipient = user;
     this.loadMessages();
   }
 
+  selectGroup(groupId: number): void {
+    this.selectedGroupId = groupId;
+    this.chatService.getGroupMessages(groupId).subscribe((msgs) => {
+      this.messages = msgs;
+    });
+  }
+
   onTyping(): void {
     if (this.recipient) {
       this.chatService.sendTypingNotification(this.myUsername, this.recipient);
     }
+  }
+
+  onScroll(): void {
+    const container = this.messagesContainer.nativeElement;
+    const threshold = 150; // pixels from bottom
+    const position = container.scrollTop + container.clientHeight;
+    const height = container.scrollHeight;
+    this.isNearBottom = position > height - threshold;
   }
 
   ngOnDestroy(): void {
@@ -197,5 +286,28 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     const user = this.users.find(u => u.email === email);
     return user ? user.name : email;
   }
+
+  createGroupChat(): void {
+    const currentUserEmail = localStorage.getItem('userEmail') || '';
+    const participantEmails = [currentUserEmail, ...this.selectedUserEmails];
+  
+    if (!this.groupName.trim() || participantEmails.length < 2) return;
+  
+    this.chatService.createGroupChat(this.groupName, participantEmails).subscribe({
+      next: (response) => {
+        console.log('✅ Group chat created successfully:', response); // 👈 Logs the result
+        alert('Group chat created successfully!');
+        this.groupName = '';
+        this.selectedUserEmails = [];
+        // this.loadGroupChats(); // Refresh group chat list
+      },
+      error: (error) => {
+        console.error('❌ Failed to create group chat:', error); // 👈 Logs the error
+        alert('Failed to create group chat!');
+      }
+    });
+  }
+  
+  
   
 }
