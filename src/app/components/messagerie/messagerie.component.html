@@ -15,6 +15,19 @@
       </li>
     </ul>
   </div>
+  <div>
+    <hr style="margin: 1rem 0; border-top: 1px solid #ccc;" />
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Tes Groupes</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li
+        *ngFor="let group of userGroups"
+        (click)="selectGroup(group.id)"
+        [class.selected]="selectedGroupId === group.id"
+        style="padding: 0.5rem; cursor: pointer; border-bottom: 1px solid #eee;">
+        {{ group.groupName }}
+      </li>
+    </ul>
+  </div>
 
   <!-- Right Section: Chat Interface -->
   <div class="chat-container" style="flex: 1; display: flex; flex-direction: column; padding: 1rem; background-color: #f4f6f8; height: 100%;">
@@ -22,8 +35,15 @@
     
     <!-- Header -->
     <div class="chat-header" style="background-color: #007bff; color: white; padding: 0.75rem 1rem; border-radius: 8px 8px 0 0;">
-      <h3 style="margin: 0;" *ngIf="recipient">Chat avec {{ getUsernameByEmail(recipient) }}</h3>
-      <h3 style="margin: 0;" *ngIf="!recipient">Sélectionnez un utilisateur pour discuter</h3>
+      <h3 style="margin: 0;" *ngIf="recipient && !selectedGroupId">
+        Chat avec {{ getUsernameByEmail(recipient) }}
+      </h3>
+      <h3 style="margin: 0;" *ngIf="selectedGroupId">
+        Groupe: {{ getGroupNameById(selectedGroupId) }}
+      </h3>
+      <h3 style="margin: 0;" *ngIf="!recipient && !selectedGroupId">
+        Sélectionnez un utilisateur ou groupe pour discuter
+      </h3>
         <!-- Group Button for CHEF and ADMIN -->
       <button
         *ngIf="isChefOrAdmin"
@@ -65,8 +85,11 @@
         }"
         class="message-container"
       >
-        <!-- Sender name -->
-        <div style="font-size: 0.75rem; color: #666; margin-bottom: 0.2rem;">
+       <!-- Sender name -->
+        <div
+          *ngIf="selectedGroupId || msg.sender !== myUsername"
+          style="font-size: 0.75rem; color: #666; margin-bottom: 0.2rem;"
+          >
           {{ msg.sender === myUsername ? 'Vous' : getUsernameByEmail(msg.sender)}}
         </div>
   
@@ -88,14 +111,22 @@
   
 
     <!-- Typing Indicator -->
-    <div *ngIf="isTyping" class="typing-wrapper" style="margin-left: 1rem; margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
-      <span class="typing-text">{{ getUsernameByEmail(typingUser)}} is typing</span>
-      <div class="typing-dots" style="display: inline-flex; margin-left: 0.3rem;">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+    <div *ngIf="isTyping && !selectedGroupId" class="typing-wrapper" ...>
+      <span class="typing-text">{{ getUsernameByEmail(typingUser)}} est en train d’écrire</span>
+      <div class="typing-dots">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
       </div>
     </div>
+    
+    <div *ngIf="typingUsers.length && selectedGroupId" class="typing-wrapper" ...>
+      <span class="typing-text">
+        {{ typingUsersText }} écrit...
+      </span>
+      <div class="typing-dots">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+    
 
     <!-- Input -->
     <div class="chat-input" style="display: flex; gap: 0.5rem; padding: 1rem; background-color: white; border-top: 1px solid #eee; border-radius: 0 0 8px 8px;">
@@ -104,7 +135,7 @@
         [(ngModel)]="newMessage"
         (input)="onTyping()"
         (keyup.enter)="sendMessage()"
-        [disabled]="!recipient"
+        [disabled]="!recipient && !selectedGroupId"
         placeholder="Écrire un message..."
         style="flex: 1; padding: 0.75rem 1rem; border: 1px solid #ccc; border-radius: 25px;"
       />
@@ -202,5 +233,10 @@
     transform: scale(1.2);
   }
 }
+
+.selected {
+    background-color: #dbeafe;
+    font-weight: bold;
+  }
 
 </style>

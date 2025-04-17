@@ -15,6 +15,8 @@ import {
   animate,
   transition,
 } from '@angular/animations';
+
+
 @Component({
   selector: 'app-chat',
   templateUrl: './messagerie.component.html',
@@ -53,7 +55,9 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   selectedUserEmails: string[] = [];
   groupChats: any[] = [];
   selectedGroupId: number | null = null;
-  isChefOrAdmin: boolean = false; 
+  isChefOrAdmin: boolean = false;
+  userGroups: Group[] = []; // Populate from backend
+  typingUsers: string[] = [];
 
   constructor(private chatService: ChatService , private authService: AuthService) {}
 
@@ -63,6 +67,8 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
       this.shouldScroll = false;
     }
   }
+
+  
   openCreateGroupChatModal() {
     const modal = this.createGroupChatModal.nativeElement;
     modal.classList.add('show');
@@ -113,15 +119,18 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     this.connectToWebSocket();
     this.isChefOrAdmin = this.authService.isChefOrAdmin();
     this.loadUsers();
-
+    this.loadGroupChats();
     setInterval(() => this.loadMessages(), 60000);
-
+  
     this.pollingSubscription = interval(3000).subscribe(() => {
       if (this.recipient) {
         this.fetchMessages(this.recipient);
       }
     });
+  
+
   }
+  
 
   getMyUsername(): void {
     const token = localStorage.getItem('token');
@@ -183,30 +192,37 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     });
   }
 
-  // loadGroupChats(): void {
-  //   this.chatService.getMyGroupChats().subscribe((chats) => {
-  //     this.groupChats = chats;
-  //   });
-  // }
+  loadGroupChats(): void {
+    this.chatService.getMyGroupChats().subscribe((chats) => {
+      console.log('Fetched group chats:', chats);
+      this.groupChats = chats;
+      this.userGroups = chats;
+    });
+  }
 
   sendMessage(): void {
     if (!this.newMessage.trim()) return;
   
+    // Construct the message object
     const message: ChatMessage = {
       sender: this.myUsername,
-      recipient: this.recipient!,
       content: this.newMessage,
       timestamp: new Date().toISOString(),
     };
   
     if (this.selectedGroupId) {
+      // If it's a group message, send to group
       this.chatService.sendGroupMessage(this.selectedGroupId, message).subscribe(() => {
+        // Push message to messages array and clear the input
         this.messages.push({ ...message, justArrived: true });
         this.newMessage = '';
         this.shouldScroll = true;
       });
     } else if (this.recipient) {
+      // If it's a private message, send to recipient
+      message.recipient = this.recipient;
       this.chatService.sendMessage(message).subscribe(() => {
+        // Push message to messages array and clear the input
         this.messages.push({ ...message, justArrived: true });
         this.newMessage = '';
         this.shouldScroll = true;
@@ -214,22 +230,44 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     }
   }
   
+  
 
   selectRecipient(user: string): void {
     this.recipient = user;
+    this.selectedGroupId = null;
     this.loadMessages();
   }
 
   selectGroup(groupId: number): void {
     this.selectedGroupId = groupId;
+    this.recipient = null;
     this.chatService.getGroupMessages(groupId).subscribe((msgs) => {
       this.messages = msgs;
     });
+  
+    this.chatService.subscribeToGroupTyping(groupId, (message: IMessage) => {
+      const data = JSON.parse(message.body);
+      if (data.sender !== this.myUsername) {
+        this.typingUser = data.sender;
+        this.isTyping = true;
+  
+        clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => {
+          this.isTyping = false;
+          this.typingUser = null;
+        }, 4000);
+      }
+    });
   }
+
+  
+  
 
   onTyping(): void {
     if (this.recipient) {
       this.chatService.sendTypingNotification(this.myUsername, this.recipient);
+    } else if (this.selectedGroupId) {
+      this.chatService.sendGroupTypingNotification(this.myUsername, this.selectedGroupId);
     }
   }
 
@@ -250,6 +288,13 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
 
   trackByMessageId(index: number, msg: ChatMessage): string {
     return msg.timestamp + '-' + msg.sender;
+  }
+
+  senderDisplayName(msg: ChatMessage): string {
+    if (this.selectedGroupId) {
+      return this.getUsernameByEmail(msg.sender);
+    }
+    return msg.sender === this.myUsername ? 'You' : this.getUsernameByEmail(msg.sender);
   }
 
   shouldShowDateSeparator(index: number): boolean {
@@ -307,7 +352,14 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
       }
     });
   }
-  
-  
+
+  get typingUsersText(): string {
+    return this.typingUsers.map(u => this.getUsernameByEmail(u)).join(', ');
+  }
+
+  getGroupNameById(groupId: number | null): string {
+    const group = this.groupChats.find(g => g.id === groupId);
+    return group ? group.name : '';
+  }
   
 }

@@ -133,11 +133,11 @@ export class ChatService {
   }
 
   // Get all group chats for the current user
-  // getMyGroupChats(): Observable<any[]> {
-  //   return this.http.get<any[]>(`${this.baseUrl}/api/group-chats/mine`, {
-  //     headers: this.getAuthHeaders()
-  //   });
-  // }
+  getMyGroupChats(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/api/group-chats/mine`, {
+      headers: this.getAuthHeaders()
+    });
+  }
 
   // Get messages from a specific group
   getGroupMessages(groupId: number): Observable<ChatMessage[]> {
@@ -151,5 +151,21 @@ export class ChatService {
     return this.http.post(`${this.baseUrl}/api/group-chats/${groupId}/send`, message, {
       headers: this.getAuthHeaders()
     });
+  }
+
+  sendGroupTypingNotification(sender: string, groupId: number): void {
+    const typingPayload = {
+      sender,
+      groupId
+    };
+  
+    this.stompClient?.publish({
+      destination: `/app/typing/group/${groupId}`,
+      body: JSON.stringify(typingPayload),
+    });
+  }
+
+  subscribeToGroupTyping(groupId: number, callback: (message: IMessage) => void): void {
+    this.stompClient?.subscribe(`/topic/group-typing/${groupId}`, callback);
   }
 }

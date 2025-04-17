@@ -21,9 +21,6 @@ export class LoginComponent {
     email: '',
     motDePasse: '',
   };
-    
-  
-   
   
   
 
