@@ -42,6 +42,7 @@
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@ng-bootstrap/ng-bootstrap": "^18.0.0",
+    "@stomp/ng2-stompjs": "^8.0.0",
     "@stomp/stompjs": "^7.0.0",
     "@swimlane/ngx-charts": "^22.0.0-alpha.1",
     "@types/chart.js": "^2.9.41",

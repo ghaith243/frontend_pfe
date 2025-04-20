@@ -112,6 +112,17 @@ body {
   margin-top: 0.5rem;
   font-size: 0.85rem;
   color: #888;
+  display: flex;
+  align-items: center;
+}
+
+.typing-text {
+  margin-right: 0.5rem;
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
 }
 
 .typing-dots .dot {

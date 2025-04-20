@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ChatMessage } from '../components/messagerie/messagerie.model';
+import { ChatMessage, GroupMessageRequest } from '../components/messagerie/messagerie.model';
 import { Observable, Subject } from 'rxjs';
 import SockJS from 'sockjs-client';
 import { Client, IMessage, Stomp } from '@stomp/stompjs';
@@ -26,6 +26,8 @@ export class ChatService {
     }
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
+
+  
 
   private getCurrentUser(): string {
     const token = localStorage.getItem('token');
@@ -58,7 +60,7 @@ export class ChatService {
     );
   }
 
-  connectWebSocket(userId: number): void {
+  connectWebSocket(userId: number , groupId?: number): void {
     this.stompClient = new Client({
       brokerURL: 'ws://localhost:8092/ws',
       webSocketFactory: () => new SockJS(`${this.baseUrl}/ws`),
@@ -71,7 +73,17 @@ export class ChatService {
           const msg: ChatMessage = JSON.parse(message.body);
           this.messageSubject.next(msg);
         });
+
+         // Subscribe to the group topic if groupId is provided
+      if (groupId) {
+        this.stompClient.subscribe(`/topic/group/${groupId}`, (message: IMessage) => {
+          const msg: ChatMessage = JSON.parse(message.body);
+          this.messageSubject.next(msg);  // Update the UI with the received message
+        });
+        }
       },
+
+      
       onStompError: (frame) => {
         console.error('STOMP error:', frame);
       }
@@ -80,10 +92,18 @@ export class ChatService {
     this.stompClient.activate();
   }
 
-  sendViaWebSocket(message: ChatMessage): void {
+  getGroupMessagesObservable() {
+    return this.messageSubject.asObservable();
+  }
+
+  sendViaWebSocket(message: ChatMessage, groupId?: number): void {
     if (this.stompClient && this.stompClient.connected) {
+      const destination = groupId
+        ? `/app/group/${groupId}/send` // Send to group chat
+        : '/chat/send';  // Send to private chat
+  
       this.stompClient.publish({
-        destination: '/chat/send',
+        destination,
         body: JSON.stringify(message)
       });
     } else {
@@ -147,9 +167,16 @@ export class ChatService {
   }
 
   // Send message to a group
-  sendGroupMessage(groupId: number, message: ChatMessage): Observable<any> {
+  sendGroupMessage(groupId: number, message: GroupMessageRequest): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/group-chats/${groupId}/send`, message, {
       headers: this.getAuthHeaders()
+    });
+  }
+
+  subscribeToGroupTopic(groupId: number, callback: (message: ChatMessage) => void): void {
+    this.stompClient?.subscribe(`/topic/group/${groupId}`, (message: IMessage) => {
+      const msg: ChatMessage = JSON.parse(message.body);
+      callback(msg);
     });
   }
 

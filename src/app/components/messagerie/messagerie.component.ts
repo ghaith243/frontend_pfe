@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
-import { ChatMessage } from './messagerie.model';
+import { ChatMessage, GroupMessageRequest } from './messagerie.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -42,7 +42,7 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   isNearBottom =  true;
   messages: ChatMessage[] = [];
   newMessage = '';
-  myUsername = localStorage.getItem('username') || 'iyed';
+  myEmail! : string;
   recipient: string | null = null;
   users: { email: string; name: string }[] = [];
   pollingSubscription!: Subscription;
@@ -58,6 +58,9 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   isChefOrAdmin: boolean = false;
   userGroups: Group[] = []; // Populate from backend
   typingUsers: string[] = [];
+  isSendingMessage: boolean = false;
+  
+
 
   constructor(private chatService: ChatService , private authService: AuthService) {}
 
@@ -120,13 +123,20 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     this.isChefOrAdmin = this.authService.isChefOrAdmin();
     this.loadUsers();
     this.loadGroupChats();
-    setInterval(() => this.loadMessages(), 60000);
+    // setInterval(() => this.loadMessages(), 60000);
   
     this.pollingSubscription = interval(3000).subscribe(() => {
       if (this.recipient) {
         this.fetchMessages(this.recipient);
       }
     });
+    const email = localStorage.getItem('email');
+    if (email) {
+      this.myEmail = email;
+    } else {
+      // Optional: redirect to login or show error
+      console.warn('User email not found in localStorage!');
+    }
   
 
   }
@@ -136,26 +146,31 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     const token = localStorage.getItem('token');
     if (token) {
       const decodedToken = this.jwtHelper.decodeToken(token);
-      this.myUsername = decodedToken.email || decodedToken.sub;
+      this.myEmail = decodedToken.email || decodedToken.sub;
     }
   }
 
   connectToWebSocket(): void {
     const userId = parseInt(localStorage.getItem('userId') || '0', 10);
+    const groupIds = this.userGroups.map(group => group.id);
     this.chatService.connectWebSocket(userId);
 
     this.chatService.onMessage().subscribe((msg: ChatMessage) => {
-      if (
-        (msg.sender === this.recipient && msg.recipient === this.myUsername) ||
-        (msg.sender === this.myUsername && msg.recipient === this.recipient)
-      ) {
+      const isCurrentChat =
+        (msg.sender === this.recipient && msg.recipient === this.myEmail) ||
+        (msg.sender === this.myEmail && msg.recipient === this.recipient);
+    
+      if (isCurrentChat) {
         this.messages.push({ ...msg, justArrived: true });
         this.shouldScroll = true;
+      } else {
+        // Optionally: notify user of a new message in another chat
+        console.log('📩 New message received but not in current chat');
       }
     });
 
     setTimeout(() => {
-      this.chatService.subscribeToTyping(this.myUsername, (message: IMessage) => {
+      this.chatService.subscribeToTyping(this.myEmail, (message: IMessage) => {
         const data = JSON.parse(message.body);
         if (data.sender === this.recipient) {
           this.typingUser = data.sender;
@@ -169,13 +184,24 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
           }, 4000);
         }
       });
-    }, 2000); // Wait for WebSocket to connect
+    }, 2000);
+    
+    this.userGroups.forEach(group => {
+      this.chatService.subscribeToGroupTopic(group.id, (msg: ChatMessage) => {
+        if (msg.groupId === this.selectedGroupId) {
+          this.messages.push({ ...msg, justArrived: true });
+          this.shouldScroll = true;
+        } else {
+          console.log('📨 New group message in another group');
+        }
+      });
+    });// Wait for WebSocket to connect
   }
 
   
 
   fetchMessages(recipient: string): void {
-    this.chatService.getMessages(this.myUsername, recipient).subscribe((data) => {
+    this.chatService.getMessages(this.myEmail, recipient).subscribe((data) => {
       this.messages = data;
     });
   }
@@ -201,32 +227,50 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   }
 
   sendMessage(): void {
-    if (!this.newMessage.trim()) return;
+    if (!this.newMessage.trim()) 
+      return;
+
+    if (this.isSendingMessage) return; // Prevent duplicate sending
   
+    if (this.selectedGroupId) {
+      const groupMessage: GroupMessageRequest = {
+        senderEmail: this.myEmail,
+        content: this.newMessage
+      };
+      console.log(`📨 Sending to group ${this.selectedGroupId}`);
+      // If it's a group message, send to group
+      this.chatService.sendGroupMessage(this.selectedGroupId, groupMessage).subscribe(() => {
+        // Push message to messages array and clear the input
+        this.messages.push({
+          ...groupMessage, justArrived: true,
+          sender: this.myEmail,
+          timestamp: new Date().toISOString()
+        });
+        this.newMessage = '';
+        this.shouldScroll = true;
+        this.isSendingMessage = false;
+      });
+    } else if (this.recipient) {
     // Construct the message object
     const message: ChatMessage = {
-      sender: this.myUsername,
+      sender: this.myEmail,
       content: this.newMessage,
       timestamp: new Date().toISOString(),
     };
-  
-    if (this.selectedGroupId) {
-      // If it's a group message, send to group
-      this.chatService.sendGroupMessage(this.selectedGroupId, message).subscribe(() => {
-        // Push message to messages array and clear the input
-        this.messages.push({ ...message, justArrived: true });
-        this.newMessage = '';
-        this.shouldScroll = true;
-      });
-    } else if (this.recipient) {
       // If it's a private message, send to recipient
       message.recipient = this.recipient;
+      console.log(`📨 Sending private message to ${this.recipient}`);
       this.chatService.sendMessage(message).subscribe(() => {
         // Push message to messages array and clear the input
         this.messages.push({ ...message, justArrived: true });
         this.newMessage = '';
         this.shouldScroll = true;
+        this.isSendingMessage = false;  // Reset flag after sending
+      }, err => {
+        console.error('❌ Error sending private message:', err);
       });
+    } else {
+      console.warn('❌ No recipient or group selected');
     }
   }
   
@@ -235,19 +279,21 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   selectRecipient(user: string): void {
     this.recipient = user;
     this.selectedGroupId = null;
+    this.messages = []; // Clear previous messages
     this.loadMessages();
   }
 
   selectGroup(groupId: number): void {
     this.selectedGroupId = groupId;
     this.recipient = null;
+    this.messages = []; // Clear previous messages
     this.chatService.getGroupMessages(groupId).subscribe((msgs) => {
       this.messages = msgs;
     });
   
     this.chatService.subscribeToGroupTyping(groupId, (message: IMessage) => {
       const data = JSON.parse(message.body);
-      if (data.sender !== this.myUsername) {
+      if (data.sender !== this.myEmail) {
         this.typingUser = data.sender;
         this.isTyping = true;
   
@@ -265,9 +311,9 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
 
   onTyping(): void {
     if (this.recipient) {
-      this.chatService.sendTypingNotification(this.myUsername, this.recipient);
+      this.chatService.sendTypingNotification(this.myEmail, this.recipient);
     } else if (this.selectedGroupId) {
-      this.chatService.sendGroupTypingNotification(this.myUsername, this.selectedGroupId);
+      this.chatService.sendGroupTypingNotification(this.myEmail, this.selectedGroupId);
     }
   }
 
@@ -294,7 +340,7 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     if (this.selectedGroupId) {
       return this.getUsernameByEmail(msg.sender);
     }
-    return msg.sender === this.myUsername ? 'You' : this.getUsernameByEmail(msg.sender);
+    return msg.sender === this.myEmail ? 'You' : this.getUsernameByEmail(msg.sender);
   }
 
   shouldShowDateSeparator(index: number): boolean {

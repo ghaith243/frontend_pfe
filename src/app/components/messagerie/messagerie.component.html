@@ -74,30 +74,30 @@
       <div
         [@messageAnimation]
         [ngClass]="{
-          'my-message': msg.sender === myUsername,
-          'other-message': msg.sender !== myUsername,
+          'my-message': msg.sender === myEmail,
+          'other-message': msg.sender !== myEmail,
           'animated-message': msg.justArrived
         }"
         [ngStyle]="{
-          'align-self': msg.sender === myUsername ? 'flex-end' : 'flex-start',
-          'text-align': msg.sender === myUsername ? 'right' : 'left',
+          'align-self': msg.sender === myEmail ? 'flex-end' : 'flex-start',
+          'text-align': msg.sender === myEmail ? 'right' : 'left',
           'margin-top': '0.5rem'
         }"
         class="message-container"
       >
        <!-- Sender name -->
         <div
-          *ngIf="selectedGroupId || msg.sender !== myUsername"
+          *ngIf="selectedGroupId || msg.sender !== myEmail"
           style="font-size: 0.75rem; color: #666; margin-bottom: 0.2rem;"
           >
-          {{ msg.sender === myUsername ? 'Vous' : getUsernameByEmail(msg.sender)}}
+          {{ msg.sender === myEmail ? 'Vous' : getUsernameByEmail(msg.sender)}}
         </div>
   
         <!-- Message bubble -->
         <div
           class="message-bubble"
-          [style.backgroundColor]="msg.sender === myUsername ? '#007bff' : '#e5e5ea'"
-          [style.color]="msg.sender === myUsername ? 'white' : 'black'"
+          [style.backgroundColor]="msg.sender === myEmail ? '#007bff' : '#e5e5ea'"
+          [style.color]="msg.sender === myEmail ? 'white' : 'black'"
           style="padding: 0.5rem 1rem; border-radius: 15px; max-width: 100%; word-wrap: break-word; word-break: break-word; white-space: normal;"
         >
           {{ msg.content }}
@@ -111,14 +111,18 @@
   
 
     <!-- Typing Indicator -->
-    <div *ngIf="isTyping && !selectedGroupId" class="typing-wrapper" ...>
-      <span class="typing-text">{{ getUsernameByEmail(typingUser)}} est en train d’écrire</span>
+    <div *ngIf="isTyping && !selectedGroupId" class="typing-wrapper">
+      <span class="typing-text">
+        {{ getUsernameByEmail(typingUser) }} est en train d’écrire 
+      </span>
       <div class="typing-dots">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
       </div>
     </div>
     
-    <div *ngIf="typingUsers.length && selectedGroupId" class="typing-wrapper" ...>
+    <div *ngIf="typingUsers.length && selectedGroupId" class="typing-wrapper">
       <span class="typing-text">
         {{ typingUsersText }} écrit...
       </span>
@@ -141,7 +145,7 @@
       />
       <button
         (click)="sendMessage()"
-        [disabled]="!recipient || !newMessage.trim()"
+        [disabled]="!newMessage.trim()"
         style="padding: 0.75rem 1.5rem; background-color: #007bff; color: white; border: none; border-radius: 25px;"
       >
         Envoyer
