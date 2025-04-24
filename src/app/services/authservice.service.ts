@@ -27,7 +27,30 @@ export class AuthService {
       })
     );
   }
+  sendResetCode(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/forgot-password`, null, {
+      params: { email },
+    });
+  }
   
+  resetPassword(email: string, code: string, newPassword: string): Observable<any> {
+    const params = { email, code, newPassword };
+    return this.http.post(`${this.apiUrl}/auth/reset-password`, null, { params });
+  }
+  
+  getUserName(): string {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        return user.nom || user.email.split('@')[0] || ''; // Fallback sur la partie avant @ de l'email
+      } catch (error) {
+        console.error('Erreur parsing user data:', error);
+        return '';
+      }
+    }
+    return '';
+  }
   
 
   // Méthode pour récupérer les données de l'utilisateur

@@ -7,14 +7,14 @@ import { AuthService } from 'app/services/authservice.service';
 
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
-    imports: [ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle, FormsModule,CommonModule]
+    imports: [ContainerComponent, RowComponent, RouterLink, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle, FormsModule,CommonModule]
 })
 export class LoginComponent {
   credentials = {
@@ -31,7 +31,7 @@ export class LoginComponent {
       (response: any) => {
         localStorage.setItem('token', response.token);// Stocker le token JWT
         localStorage.setItem('role', response.role);
-        localStorage.setItem('userEmail', response.email);
+        localStorage.setItem('userEmail', this.credentials.email);
         this.router.navigateByUrl('/dashboard');// Rediriger vers le profil
       },
       (error) => {

@@ -44,7 +44,7 @@ import { UserserviceService } from 'app/services/userservice.service';
 export class DefaultLayoutComponent implements OnInit {
   public navItems: NavItem[] = []; // Définir explicitement navItems avec le type NavItem[]
   public role: string = ''; // Le rôle initialisé à une chaîne vide
-
+   
   constructor(private authService: AuthService, private userservice: UserserviceService) {}
 
   ngOnInit(): void {

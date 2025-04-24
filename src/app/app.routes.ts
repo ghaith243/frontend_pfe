@@ -11,6 +11,9 @@ import { authGuard } from './guards/auth.guard';
 import { AbsencesComponent } from './components/absences/absences.component';
 import { EmployeAbsenceComponent } from './components/absences/employe-absence/employe-absence.component';
 
+import { ListeUserComponent } from './components/liste-user/liste-user.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -19,7 +22,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    canActivate:[authGuard],
+    //canActivate:[authGuard],
     component: DefaultLayoutComponent,
     data: {
       title: 'Home'
@@ -37,6 +40,9 @@ export const routes: Routes = [
       {path:'calendrier',component:CalendrierComponent},
       {path:'absences',component:AbsencesComponent},
       {path:'mesabsences',component:EmployeAbsenceComponent},
+      {path:'users',component:ListeUserComponent},
+      
+   
      
     
   
@@ -50,6 +56,7 @@ export const routes: Routes = [
       }
     ]
   },
+  {path:'forgotpass',component:ForgotPasswordComponent},
   {
     path: '404',
     loadComponent: () => import('./views/pages/page404/page404.component').then(m => m.Page404Component),
@@ -71,6 +78,7 @@ export const routes: Routes = [
       title: 'Login Page'
     }
   },
+ 
   {
     path: 'register',
     loadComponent: () => import('./views/pages/register/register.component').then(m => m.RegisterComponent),

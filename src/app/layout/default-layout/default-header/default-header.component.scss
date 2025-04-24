@@ -285,3 +285,51 @@ c-breadcrumb-router {
     max-width: 90vw;
   }
 }
+/* Style pour le cercle des initiales */
+.user-initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #007bff; /* Bleu primaire, comme btn-primary */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 2px solid #28a745; /* Bordure verte pour simuler le statut success */
+}
+
+.user-initials.no-initials {
+  background-color: #6c757d; /* Gris pour le cas où il n'y a pas d'initiales */
+}
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #3c4b64;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.scrollable-dropdown {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.user-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: #fff; // White text for contrast
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 50%; // Circular shape
+  text-transform: uppercase;
+}

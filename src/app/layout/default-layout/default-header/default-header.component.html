@@ -16,7 +16,7 @@
       <c-nav-item>
         <a cNavLink routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
       </c-nav-item>
-      <c-nav-item>
+      <c-nav-item *ngIf="userRole === 'ADMIN'">
         <a cNavLink routerLink="/users" routerLinkActive="active">Users</a>
       </c-nav-item>
       <c-nav-item>
@@ -98,14 +98,9 @@
 <ng-template #userDropdown>
   <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
     <button [caret]="false" cDropdownToggle class="py-0 pe-0" aria-label="Open user menu">
-      <c-avatar
-        shape="rounded-1"
-        [size]="'md'"
-        [src]="profilePictureUrl"
-        status="success"
-        textColor="primary"
-        alt="User avatar"
-      />
+      <div class="user-initials" [style.backgroundColor]="userColor">
+        {{ userInitials }}
+      </div>
     </button>
     <ul cDropdownMenu class="pt-0 w-auto">
       <li>

@@ -3,26 +3,35 @@
     <c-row class="justify-content-center">
       <c-col lg="10" xl="8">
         <c-card-group>
-          <c-card class="p-4">
+          <!-- Left card - Login form -->
+          <c-card class="p-4 border-0 shadow-sm">
             <c-card-body>
+              <!-- Logo added above login text -->
+              <div class="text-center mb-4">
+                <img src="assets/images/logo.png" alt="Company Logo" class="img-fluid mb-3" style="max-height: 60px;">
+              </div>
+              
               <form cForm (ngSubmit)="onSubmit()">
-                <h1>Login</h1>
-                <p class="text-body-secondary">Sign In to your account</p>
+                <h1 class="text-center mb-1 fw-bold">Login</h1>
+                <p class="text-body-secondary text-center mb-4">Sign In to your account</p>
+                
                 <c-input-group class="mb-3">
-                  <span cInputGroupText>
+                  <span cInputGroupText class="bg-light">
                     <svg cIcon name="cilUser"></svg>
                   </span>
                   <input
                     autoComplete="email"
                     cFormControl
-                    placeholder="email"
+                    placeholder="Email"
                     [(ngModel)]="credentials.email"
                     name="email"
+                    class="py-2"
                     required
                   />
                 </c-input-group>
+                
                 <c-input-group class="mb-4">
-                  <span cInputGroupText>
+                  <span cInputGroupText class="bg-light">
                     <svg cIcon name="cilLockLocked"></svg>
                   </span>
                   <input
@@ -32,29 +41,38 @@
                     type="password"
                     [(ngModel)]="credentials.motDePasse"
                     name="motDePasse"
+                    class="py-2"
                   />
                 </c-input-group>
-                <c-row>
-                  <c-col xs="6">
-                    <button type="submit" cButton class="px-4" color="primary">
-                      Login
-                    </button>
-                  </c-col>
-                  <c-col class="text-right" xs="6">
-                    <button cButton class="px-0" color="link">
-                      Forgot password?
-                    </button>
-                  </c-col>
-                </c-row>
+                
+                <!-- Full width login button -->
+                <button type="submit" cButton class="w-100 py-2 mb-3" color="primary">
+                  Login
+                </button>
+                
+                <div class="text-center">
+                  <div class="text-center">
+                    <a [routerLink]="['/forgotpass']" cButton class="px-0" color="link">Forgot password?</a>
+                  </div>
+                </div>
               </form>
             </c-card-body>
           </c-card>
-          <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white bg-primary py-5">
-            <c-card-body class="text-center">
-              <div>
-                <p>
+          
+          <!-- Right card - Welcome message -->
+          <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white py-5 border-0" style="background-color: #1a2942;">
+            <c-card-body class="d-flex flex-column justify-content-center">
+              <div class="text-center px-4">
+                <h2 class="mb-4 fw-bold">Bienvenue</h2>
+                <p class="mb-4">
                   Bienvenue sur le système de gestion des congés ARABSOFT, conçu pour optimiser la gestion des absences en entreprise.
                 </p>
+                
+                <!-- Added decorative elements -->
+                <div class="d-flex justify-content-center mt-4">
+                 
+                </div>
+                
               </div>
             </c-card-body>
           </c-card>

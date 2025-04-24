@@ -1,0 +1,175 @@
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold text-primary">Gestion des Utilisateurs</h2>
+      <button class="btn btn-primary btn-lg rounded-pill shadow-sm" (click)="openAddModal()" data-bs-toggle="tooltip" title="Ajouter un nouvel utilisateur" [disabled]="isLoading">
+        <i class="bi bi-plus-circle me-2"></i> Ajouter
+      </button>
+    </div>
+  
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+    </div>
+  
+    <!-- Error Message -->
+    <div *ngIf="errorMessage && !isLoading" class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ errorMessage }}
+      <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+    </div>
+  
+    <!-- Users Table -->
+    <div class="card shadow-sm border-0" *ngIf="!isLoading">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="px-4 py-3">Nom</th>
+                <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3">Rôle</th>
+                <th class="px-4 py-3">Service</th>
+                <th class="px-4 py-3 text-end">Nombre d'enfants</th>
+                <th class="px-4 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of users" class="align-middle">
+                <td class="px-4 py-3">{{ user.nom }}</td>
+                <td class="px-4 py-3">{{ user.email }}</td>
+                <td class="px-4 py-3">{{ user.role.name }}</td>
+                <td class="px-4 py-3">{{ user.service.nom }}</td>
+                <td class="px-4 py-3 text-end">{{ user.enfantCount }}</td>
+                <td class="px-4 py-3 text-end">
+                  <button class="btn btn-sm btn-outline-primary me-2 rounded-circle action-btn" (click)="openEditModal(user)" data-bs-toggle="tooltip" title="Modifier l'utilisateur" [disabled]="isLoading">
+                    <img src="assets/images/pen.png" alt="Modifier" class="action-icon">
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger rounded-circle action-btn" (click)="deleteUser(user.id)" data-bs-toggle="tooltip" title="Supprimer l'utilisateur" [disabled]="isLoading">
+                    <img src="assets/images/remove.png" alt="Supprimer" class="action-icon">
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="users.length === 0">
+                <td colspan="6" class="text-center py-4 text-muted">Aucun utilisateur trouvé</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" [ngClass]="{'show d-block': showAddModal}" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addUserModalLabel">Ajouter un Utilisateur</h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeAddModal()" aria-label="Close" [disabled]="isLoading"></button>
+          </div>
+          <div class="modal-body">
+            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+            </div>
+            <form #addForm="ngForm" (ngSubmit)="addUser()">
+              <div class="mb-3">
+                <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nom" [(ngModel)]="newUser.nom" name="nom" required #nom="ngModel" [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
+                <div *ngIf="nom.invalid && nom.touched" class="invalid-feedback">Le nom est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" [(ngModel)]="newUser.email" name="email" required email #email="ngModel" [ngClass]="{'is-invalid': email.invalid && email.touched}">
+                <div *ngIf="email.invalid && email.touched" class="invalid-feedback">Veuillez entrer un email valide.</div>
+              </div>
+              <div class="mb-3">
+                <label for="motDePasse" class="form-label">Mot de passe <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="motDePasse" [(ngModel)]="newUser.motDePasse" name="motDePasse" required #motDePasse="ngModel" [ngClass]="{'is-invalid': motDePasse.invalid && motDePasse.touched}">
+                <div *ngIf="motDePasse.invalid && motDePasse.touched" class="invalid-feedback">Le mot de passe est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="role" class="form-label">Rôle <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="role" [(ngModel)]="newUser.role" name="role" required #role="ngModel" [ngClass]="{'is-invalid': role.invalid && role.touched}">
+                <div *ngIf="role.invalid && role.touched" class="invalid-feedback">Le rôle est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="serviceId" class="form-label">Service ID <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="serviceId" [(ngModel)]="newUser.serviceId" name="serviceId" required #serviceId="ngModel" [ngClass]="{'is-invalid': serviceId.invalid && serviceId.touched}">
+                <div *ngIf="serviceId.invalid && serviceId.touched" class="invalid-feedback">L'ID du service est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="enfantCount" class="form-label">Nombre d'enfants</label>
+                <input type="number" class="form-control" id="enfantCount" [(ngModel)]="newUser.enfantCount" name="enfantCount" min="0" #enfantCount="ngModel" [ngClass]="{'is-invalid': enfantCount.invalid && enfantCount.touched}">
+                <div *ngIf="enfantCount.invalid && enfantCount.touched" class="invalid-feedback">Veuillez entrer un nombre valide.</div>
+              </div>
+              <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" (click)="closeAddModal()" [disabled]="isLoading">Annuler</button>
+                <button type="submit" class="btn btn-primary rounded-pill" [disabled]="addForm.invalid || isLoading">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" [ngClass]="{'show d-block': showEditModal}" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editUserModalLabel">Modifier l'Utilisateur</h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeEditModal()" aria-label="Close" [disabled]="isLoading"></button>
+          </div>
+          <div class="modal-body">
+            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+            </div>
+            <form #editForm="ngForm" (ngSubmit)="updateUser()">
+              <div class="mb-3">
+                <label for="editNom" class="form-label">Nom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editNom" [(ngModel)]="newUser.nom" name="editNom" required #editNom="ngModel" [ngClass]="{'is-invalid': editNom.invalid && editNom.touched}">
+                <div *ngIf="editNom.invalid && editNom.touched" class="invalid-feedback">Le nom est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="editEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="editEmail" [(ngModel)]="newUser.email" name="editEmail" required email #editEmail="ngModel" [ngClass]="{'is-invalid': editEmail.invalid && editEmail.touched}">
+                <div *ngIf="editEmail.invalid && editEmail.touched" class="invalid-feedback">Veuillez entrer un email valide.</div>
+              </div>
+              <div class="mb-3">
+                <label for="editMotDePasse" class="form-label">Mot de passe (laisser vide pour ne pas modifier)</label>
+                <input type="password" class="form-control" id="editMotDePasse" [(ngModel)]="newUser.motDePasse" name="editMotDePasse">
+              </div>
+              <div class="mb-3">
+                <label for="editRole" class="form-label">Rôle <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editRole" [(ngModel)]="newUser.role" name="editRole" required #editRole="ngModel" [ngClass]="{'is-invalid': editRole.invalid && editRole.touched}">
+                <div *ngIf="editRole.invalid && editRole.touched" class="invalid-feedback">Le rôle est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="editServiceId" class="form-label">Service ID <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="editServiceId" [(ngModel)]="newUser.serviceId" name="editServiceId" required #editServiceId="ngModel" [ngClass]="{'is-invalid': editServiceId.invalid && editServiceId.touched}">
+                <div *ngIf="editServiceId.invalid && editServiceId.touched" class="invalid-feedback">L'ID du service est requis.</div>
+              </div>
+              <div class="mb-3">
+                <label for="editEnfantCount" class="form-label">Nombre d'enfants</label>
+                <input type="number" class="form-control" id="editEnfantCount" [(ngModel)]="newUser.enfantCount" name="editEnfantCount" min="0" #editEnfantCount="ngModel" [ngClass]="{'is-invalid': editEnfantCount.invalid && editEnfantCount.touched}">
+                <div *ngIf="editEnfantCount.invalid && editEnfantCount.touched" class="invalid-feedback">Veuillez entrer un nombre valide.</div>
+              </div>
+              <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" (click)="closeEditModal()" [disabled]="isLoading">Annuler</button>
+                <button type="submit" class="btn btn-primary rounded-pill" [disabled]="editForm.invalid || isLoading">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Mettre à jour
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

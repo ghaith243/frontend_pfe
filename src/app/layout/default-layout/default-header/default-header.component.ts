@@ -42,7 +42,10 @@ import { NotificationComponent } from 'app/components/notification/notification.
 })
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit, OnDestroy {
   profilePictureUrl: string = '';
-  notifications: any[] = []
+  notifications: any[] = [];
+  userRole: string = '';
+  userInitials: string = '';
+  userColor: string = '#0d6efd'; // Default color
   private subscription!: Subscription;
   private notificationsSubscription!: Subscription;
   readonly #colorModeService = inject(ColorModeService);
@@ -68,6 +71,13 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
   }
 
   ngOnInit(): void {
+    // Récupérer le rôle de l'utilisateur
+    this.userRole = this.authService.getUserRole();
+    this.userInitials = this.getUserInitials()
+    this.userColor = this.generateColorFromEmail(this.userInitials);
+
+  
+    
     // 📌 Écoute des notifications stockées + en temps réel
     this.notificationsSubscription = this.notificationsService.notifications$.subscribe((notifications) => {
       // Trier pour afficher les nouvelles notifications en premier
@@ -81,6 +91,37 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
     this.subscription.add(profileSub);
   
 
+  }
+  getUserInitials(): string {
+    const userEmail = localStorage.getItem('userEmail') || '';
+    return userEmail ? userEmail.substring(0, 2).toUpperCase() : 'UN'; // UN for Unknown
+
+  }
+   // Fonction pour générer une couleur basée sur l'email
+   private generateColorFromEmail(email: string): string {
+    if (!email) return '#0d6efd'; // Couleur par défaut si pas d'email
+
+    // Liste de couleurs prédéfinies
+    const colors = [
+      '#FF6F61', // Coral
+      '#6B5B95', // Purple
+      '#88B04B', // Green
+      '#F7CAC9', // Pink
+      '#92A8D1', // Blue
+      '#FFCC5C', // Yellow
+      '#D4A5A5', // Light Red
+      '#9B59B6', // Violet
+    ];
+
+    // Calculer un hash simple basé sur l'email
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+      hash = email.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Mapper le hash à un index dans la liste des couleurs
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
   }
 
   formatNotificationTime(dateString: string): string {
@@ -100,6 +141,8 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
 
     return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
   }
+  
+
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
