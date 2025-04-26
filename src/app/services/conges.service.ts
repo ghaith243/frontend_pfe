@@ -36,6 +36,18 @@ export class CongesService {
       })
     );
   }
+  getAllConges( token: string): Observable<any> {
+    if (!token) {
+      return throwError(() => new Error('Token non fourni'));
+    }
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get(`${this.apiUrl}/conges/all`, { headers }).pipe(
+      catchError((error) => {
+        console.error('Erreur lors de la récupération des congés du service:', error);
+        return throwError(() => new Error('Erreur lors de la récupération des congés du service.'));
+      })
+    );
+  }
   updateCongeStatus(congeId: number, status: string, token: string): Observable<any> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     const body = { status }; // statut 'APPROUVE' ou 'REJETE'

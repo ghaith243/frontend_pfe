@@ -1,0 +1,84 @@
+<div class="conges-container">
+    <div class="header">
+      <h1>Liste des congés</h1>
+      <div class="filters">
+        <label for="status-filter">Filtrer par statut:</label>
+        <select id="status-filter" [(ngModel)]="selectedStatus" (change)="filterCongesByStatus()" class="filter-select">
+          <option value="TOUS">Tous les statuts</option>
+          <option value="EN_ATTENTE">En attente</option>
+          <option value="APPROUVE">Approuvé</option>
+          <option value="REJETE">Refusé</option>
+        </select>
+      </div>
+    </div>
+  
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Chargement des données...</p>
+    </div>
+  
+    <div *ngIf="errorMessage" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>{{ errorMessage }}</p>
+    </div>
+  
+    <div *ngIf="!isLoading && !errorMessage" class="table-container">
+      <div *ngIf="(selectedStatus === 'TOUS' ? conges : filteredConges).length > 0; else noConges">
+        <table class="conges-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Utilisateur</th>
+              <th>Date Début</th>
+              <th>Date Fin</th>
+              <th>Durée</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let conge of (selectedStatus === 'TOUS' ? conges : filteredConges)">
+              <td>{{ conge.id }}</td>
+              <td>
+                <div class="user-info">
+                  <div class="user-avatar">{{ conge.utilisateur?.nom.charAt(0) }}</div>
+                  <span>{{ conge.utilisateur?.nom }}</span>
+                </div>
+              </td>
+              <td>{{ conge.dateDebut | date:'dd/MM/yyyy' }}</td>
+              <td>{{ conge.dateFin | date:'dd/MM/yyyy' }}</td>
+              <td>{{ calculateDuration(conge.dateDebut, conge.dateFin) }} jours</td>
+              <td>
+                <span class="status-badge" [ngClass]="{
+                  'status-pending': conge.status === 'EN_ATTENTE',
+                  'status-approved': conge.status === 'APPROUVE',
+                  'status-rejected': conge.status === 'REJETE'
+                }">
+                  {{ conge.status }}
+                </span>
+              </td>
+              <td class="actions">
+                <button class="action-btn view-btn" title="Voir les détails">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn edit-btn" title="Modifier" *ngIf="conge.status === 'EN_ATTENTE'">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" title="Supprimer" *ngIf="conge.status === 'EN_ATTENTE'">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <ng-template #noConges>
+        <div class="empty-state">
+          <i class="fas fa-calendar-times empty-icon"></i>
+          <h2>Aucun congé trouvé</h2>
+          <p>Il n'y a pas de congés correspondant à vos critères de recherche.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>

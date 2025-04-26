@@ -13,6 +13,7 @@ import { EmployeAbsenceComponent } from './components/absences/employe-absence/e
 
 import { ListeUserComponent } from './components/liste-user/liste-user.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ListeAllcongeComponent } from './components/liste-allconge/liste-allconge.component';
 
 export const routes: Routes = [
   {
@@ -41,7 +42,7 @@ export const routes: Routes = [
       {path:'absences',component:AbsencesComponent},
       {path:'mesabsences',component:EmployeAbsenceComponent},
       {path:'users',component:ListeUserComponent},
-      
+      {path:'all-conges',component:ListeAllcongeComponent},
    
      
     
