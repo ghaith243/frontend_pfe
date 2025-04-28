@@ -1,7 +1,8 @@
 <!-- Liste des congés de l'utilisateur -->
-<div  class="mb-5">
-    <h3>Vos congés</h3>
-    <table class="table">
+<div class="user-conges-container mb-5">
+  <h3 class="section-title">Vos congés</h3>
+  <div class="table-wrapper">
+    <table class="user-conges-table">
       <thead>
         <tr>
           <th>Date début</th>
@@ -11,18 +12,28 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let conge of userConges">
+        <tr *ngFor="let conge of userConges" [@fadeIn]>
           <td>{{ conge.dateDebut | date }}</td>
           <td>{{ conge.dateFin | date }}</td>
           <td>{{ conge.type }}</td>
-          <td>{{ conge.status }}</td>
+          <td>
+            <span [ngClass]="{
+              'status-badge': true,
+              'status-approved': conge.status === 'APPROUVE',
+              'status-rejected': conge.status === 'REJETE',
+              'status-pending': !conge.status || conge.status === 'EN_ATTENTE'
+            }">
+              {{ conge.status ? conge.status : 'EN ATTENTE' }}
+            </span>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
-  
-  <!-- Calendrier des congés -->
-  <div>
-    <h2>Mon calendrier de congés</h2>
-    <full-calendar [options]="calendarOptions"></full-calendar>
-  </div>
+</div>
+
+<!-- Calendrier des congés -->
+<div class="calendar-container">
+  <h2 class="section-title">Mon calendrier de congés</h2>
+  <full-calendar [options]="calendarOptions"></full-calendar>
+</div>

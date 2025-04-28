@@ -36,7 +36,7 @@ import { NotificationComponent } from 'app/components/notification/notification.
   imports: [
     FormsModule, CommonModule, ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective,
     HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet,
-    BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective,
+    BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, DropdownMenuDirective,
     DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, RouterModule,RouterLink
   ]
 })

@@ -7,12 +7,20 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FullCalendarModule } from '@fullcalendar/angular';
-
+import { trigger, style, transition, animate } from '@angular/animations'; // <<< ADD this
 @Component({
   selector: 'app-listconges',
   templateUrl: './listconges.component.html',
   styleUrls: ['./listconges.component.scss'],
-    imports: [FormsModule, CommonModule, FullCalendarModule]
+    imports: [FormsModule, CommonModule, FullCalendarModule],
+    animations: [ // <<< ADD this
+      trigger('fadeIn', [
+        transition(':enter', [
+          style({ opacity: 0, transform: 'translateY(10px)' }),
+          animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        ])
+      ])
+    ],
 })
 export class ListcongesComponent   {
   userConges: any[] = [];
