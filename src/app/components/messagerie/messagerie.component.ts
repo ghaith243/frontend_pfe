@@ -288,8 +288,14 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     this.recipient = null;
     this.messages = []; // Clear previous messages
     this.chatService.getGroupMessages(groupId).subscribe((msgs) => {
-      this.messages = msgs;
-    });
+      // Filter out duplicate messages based on timestamp or a unique ID
+      msgs.forEach((msg: ChatMessage) => {
+        const messageExists = this.messages.some((m) => m.timestamp === msg.timestamp);
+        if (!messageExists) {
+          this.messages.push(msg);
+        }
+      });
+      });
   
     this.chatService.subscribeToGroupTyping(groupId, (message: IMessage) => {
       const data = JSON.parse(message.body);
