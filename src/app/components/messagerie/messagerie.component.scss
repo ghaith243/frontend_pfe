@@ -30,6 +30,44 @@ html, body {
   color: #333;
 }
 
+/* Users Section */
+.users-section {
+  overflow-y: auto;
+  max-height: 500px; /* Limit height to show only 5 users */
+  margin-bottom: 1rem;
+}
+
+.users-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.users-section li {
+  padding: 0.7rem;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: background 0.3s;
+}
+
+.users-section li:hover {
+  background-color: #f0f0f0;
+}
+
+.users-section li.selected {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+/* Groups Section */
+.groups-section {
+  overflow-y: auto;
+  max-height: 500px; /* Set the same max-height as users section to show limited groups */
+  flex-grow: 1; /* Let groups take remaining space */
+}
+
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -57,10 +95,18 @@ html, body {
 /* Chat Area */
 .chat-area {
   flex: 1;
+  position: fixed;
+  top: 15%;           /* Adjust this value to control the vertical position */
+  right: 10%;         /* Keeps the chat window on the right side with some margin */
+  width: 1000px;       /* Set a fixed width for the chat window */
+  height: 80%;        /* Adjust the height of the chat window as needed */
+  max-height: 1200px;  /* Set a maximum height for the chat window */
   display: flex;
   flex-direction: column;
   padding: 1rem;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for styling */
   overflow: hidden; /* prevent full chat area scrolling */
+  z-index: 9999;    /* Ensure it stays on top of other content */
 }
 
 /* Header */
@@ -98,6 +144,8 @@ html, body {
   border-radius: 8px;
   padding: 1rem;
   overflow-y: auto;
+  overflow-x: hidden;  /* Hides the horizontal scrollbar */
+  white-space: normal; /* Ensures content doesn't overflow horizontally */
   display: flex;
   flex-direction: column-reverse;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -241,5 +289,70 @@ html, body {
 .chat-input button:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+/* Modal Styling */
+.modal {
+  z-index: 10000 !important;
+  position: fixed !important;
+  top: 0%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none; /* Hide modal initially */
+  opacity: 0; /* Start with modal invisible */
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.modal.show {
+  display: block; /* Show modal */
+}
+
+.modal-backdrop {
+  z-index: 1040 !important;
+  background-color: rgba(0, 0, 0, 0.5); /* Background for modal */
+}
+
+/* Modal Dialog */
+.modal-dialog {
+  position: relative;
+  top: 10%;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Modal Fade-in and Fade-out Keyframes */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Optional: Modal Close animation (when closing) */
+.modal.fade-out {
+  animation: fadeOut 0.2s ease-in forwards;
+  display: none;
+}
+
+/* Dark Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Dark background */
+  z-index: 10000; /* Ensure it stays behind the modal */
 }
 
