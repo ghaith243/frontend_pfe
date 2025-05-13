@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { FormModule } from '@coreui/angular';
 import { AbsenceRequest, AbsencesService } from 'app/services/absences.service';
 import { UserserviceService } from 'app/services/userservice.service';
-
 @Component({
   selector: 'app-absences',
   templateUrl: './absences.component.html',

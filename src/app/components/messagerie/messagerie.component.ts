@@ -30,6 +30,15 @@ import {
         animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
       ]),
     ]),
+    trigger('modalAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.5)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0 })),
+      ]),
+    ]),
   ],
 })
 
@@ -59,7 +68,7 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
   userGroups: Group[] = []; // Populate from backend
   typingUsers: string[] = [];
   isSendingMessage: boolean = false;
-  
+  searchText: string = '';
 
 
   constructor(private chatService: ChatService , private authService: AuthService) {}
@@ -76,7 +85,8 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     const modal = this.createGroupChatModal.nativeElement;
     modal.classList.add('show');
     modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';  // Prevent scrolling
+    document.body.style.overflow = 'hidden';
+    this.isModalOpen = true; // Show the modal
   }
 
   onUserCheckboxChange(event: any, email: string) {
@@ -101,7 +111,8 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
     const modal = this.createGroupChatModal.nativeElement;
     modal.classList.remove('show');
     modal.style.display = 'none';
-    document.body.style.overflow = '';  // Restore body scroll
+    document.body.style.overflow = '';
+    this.isModalOpen = false; // Show the modal  // Restore body scroll
   }
 
   scrollToBottom(): void {
@@ -407,6 +418,15 @@ export class MessagerieComponent implements OnInit, OnDestroy ,AfterViewChecked 
 
   get typingUsersText(): string {
     return this.typingUsers.map(u => this.getUsernameByEmail(u)).join(', ');
+  }
+
+  filteredUsers() {
+    if (!this.searchText) {
+      return this.users;  // If no search text, return all users
+    }
+    return this.users.filter(user =>
+      user.name.toLowerCase().includes(this.searchText.toLowerCase())
+    );
   }
 
   getGroupNameById(groupId: number | null): string {
