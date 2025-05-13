@@ -1,0 +1,7 @@
+.disabled-button {
+  pointer-events: none;
+  opacity: 0.6;
+  color: #6c757d !important; /* Bootstrap secondary/gray color */
+  border-color: #6c757d !important;
+  background-color: transparent;
+}

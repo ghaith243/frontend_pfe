@@ -24,7 +24,7 @@ export class AbsencesService {
 
  
   marquerAbsence(request: AbsenceRequest): Observable<any> {
-    const token = localStorage.getItem('token'); // 👈 récupère le token
+    const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post(`${this.apiUrl}/marquer`, request, { headers });
   }

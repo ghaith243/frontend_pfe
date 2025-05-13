@@ -15,39 +15,62 @@
 
   <div *ngIf="isLoading" class="text-center">Chargement en cours...</div>
 
-  <table class="table" *ngIf="!isLoading && filteredConges.length > 0">
-    <thead>
-      <tr>
-        <th>Employé</th>
-        <th>Date début</th>
-        <th>Date fin</th>
-        <th>Type</th>
-        <th>Statut</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let conge of filteredConges">
-        <td>{{ conge.utilisateur?.nom }} {{ conge.utilisateur?.prenom }}</td>
-        <td>{{ conge.dateDebut | date:'dd/MM/yyyy' }}</td>
-        <td>{{ conge.dateFin | date:'dd/MM/yyyy' }}</td>
-        <td>{{ conge.type }}</td>
-        <td>{{ conge.status }}</td>
-        <td>
-          <button class="btn btn-success btn-sm me-2" 
-                  (click)="approveOrRejectConge(conge.id_conge, 'APPROUVE')"
-                  [disabled]="conge.status === 'APPROUVE'">
+<table class="table table-bordered table-striped shadow-sm rounded">
+  <thead class="table-dark">
+    <tr>
+      <th>Employé</th>
+      <th>Date début</th>
+      <th>Date fin</th>
+      <th>Type</th>
+      <th>Statut</th>
+      <th class="text-center">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let conge of filteredConges">
+      <td>{{ conge.utilisateur?.nom }} {{ conge.utilisateur?.prenom }}</td>
+      <td>{{ conge.dateDebut | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ conge.dateFin | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ conge.type }}</td>
+      <td>
+        <span [ngClass]="{
+          'badge bg-warning text-dark': conge.status === 'EN_ATTENTE',
+          'badge bg-success': conge.status === 'APPROUVE',
+          'badge bg-danger': conge.status === 'REJETE'
+        }">
+          {{ conge.status }}
+        </span>
+      </td>
+      <td class="text-center">
+        <div class="d-flex justify-content-center gap-2">
+          <button
+            class="btn btn-sm"
+            [ngClass]="{
+              'btn-outline-success disabled-button': conge.status === 'APPROUVE',
+              'btn-outline-success': conge.status !== 'APPROUVE'
+            }"
+            [disabled]="conge.status === 'APPROUVE'"
+            (click)="approveOrRejectConge(conge.id_conge, 'APPROUVE')">
             Approuver
           </button>
-          <button class="btn btn-danger btn-sm" 
-                  (click)="approveOrRejectConge(conge.id_conge, 'REJETE')"
-                  [disabled]="conge.status === 'REJETE'">
+
+          <button
+            class="btn btn-sm"
+            [ngClass]="{
+              'btn-outline-danger disabled-button': conge.status === 'REJETE',
+              'btn-outline-danger': conge.status !== 'REJETE'
+            }"
+            [disabled]="conge.status === 'REJETE'"
+            (click)="approveOrRejectConge(conge.id_conge, 'REJETE')">
             Rejeter
           </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 
   <div *ngIf="!isLoading && filteredConges.length === 0" class="alert alert-info">
     Aucun congé trouvé pour ce service.

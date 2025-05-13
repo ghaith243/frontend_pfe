@@ -46,6 +46,20 @@ export class AbsencesComponent implements OnInit {
    
   }
 
+  // ✅ modal control methods
+  openModal(): void {
+    this.showModal = true;
+    this.form.reset({ justifiee: false }); // optional: reset form
+  }
+
+  closeModal(): void {
+    this.isClosing = true;
+     setTimeout(() => {
+      this.showModal = false;
+      this.isClosing = false;
+    }, 300);
+  }
+
   onSubmit(): void {
     if (this.form.valid) {
       const request: AbsenceRequest = this.form.value;
@@ -55,6 +69,7 @@ export class AbsencesComponent implements OnInit {
           alert('Absence enregistrée !'); // ✅ remplacement de toastr.success
           this.form.reset({ justifiee: false });
           this.getALLabsence();
+          this.closeModal();
         },
         error: () => {
           alert("Erreur lors de l'enregistrement de l'absence"); // ✅ remplacement de toastr.error
@@ -70,7 +85,9 @@ export class AbsencesComponent implements OnInit {
   loading: boolean = false;
   triAsc: boolean = true;
   filtreEmployeId: number | null = null;
-  
+  showModal: boolean = false;
+  isClosing: boolean = false;
+
   getALLabsence(): void {
     this.loading = true;
     const token = localStorage.getItem('token');
@@ -102,8 +119,9 @@ export class AbsencesComponent implements OnInit {
   }
   
   filtrerAbsences(): void {
+    const employeId = this.filtreEmployeId ? Number(this.filtreEmployeId) : null;
     this.filteredAbsences = this.absences.filter(abs => {
-      const employeMatch = this.filtreEmployeId ? abs.employe.id === this.filtreEmployeId : true;
+      const employeMatch = employeId ? abs.employe.id === employeId : true;
       const dateMatch = this.filtreDate ? abs.date.startsWith(this.filtreDate) : true;
       return employeMatch && dateMatch;
     });

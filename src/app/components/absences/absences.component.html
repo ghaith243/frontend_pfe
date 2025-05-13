@@ -1,65 +1,30 @@
 <div class="container my-4">
-  <!-- Marquer une absence -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">📅 Marquer une absence</h5>
-    </div>
-    <div class="card-body">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">Employé</label>
-            <select class="form-select" formControlName="employeId">
-              <option value="" disabled selected>-- Sélectionner un employé --</option>
-              <option *ngFor="let emp of employes" [value]="emp.id">
-                {{ emp.nom }}
-              </option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Motif</label>
-            <input type="text" class="form-control" formControlName="motif" placeholder="Ex: Maladie" />
-          </div>
-
-          <div class="col-md-4 d-flex align-items-center">
-            <div class="form-check mt-3">
-              <input type="checkbox" class="form-check-input" formControlName="justifiee" />
-              <label class="form-check-label">Justifiée ?</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-end mt-3">
-          <button type="submit" class="btn btn-success">
-            ✅ Marquer comme absent
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <!-- Filtres -->
-  <div class="row mt-4">
+  <div class="row mb-4">
     <div class="col-md-6">
-      <label>🔍 Filtrer par employé</label>
-      <select class="form-select" [(ngModel)]="filtreEmploye" (change)="filtrerAbsences()">
+      <label> Filtrer par employé</label>
+      <select class="form-select" [(ngModel)]="filtreEmployeId" (change)="filtrerAbsences()">
         <option value="">Tous les employés</option>
-        <option *ngFor="let emp of employes" [value]="emp.nom">{{ emp.nom }}</option>
+        <option *ngFor="let emp of employes" [value]="emp.id">{{ emp.nom }}</option>
       </select>
     </div>
     <div class="col-md-6">
-      <label>📅 Filtrer par date</label>
+      <label> Filtrer par date</label>
       <input type="date" class="form-control" [(ngModel)]="filtreDate" (change)="filtrerAbsences()" />
     </div>
   </div>
 
   <!-- Liste des absences -->
-  <div class="card shadow-sm mt-4">
+  <div class="card shadow-sm">
     <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">📋 Liste des absences</h5>
-      <div *ngIf="loading" class="spinner-border text-light" role="status" style="width: 1.5rem; height: 1.5rem;">
-        <span class="visually-hidden">Loading...</span>
+      <h5 class="mb-0"> Liste des absences</h5>
+      <div>
+        <button class="btn btn-light btn-sm me-2" (click)="openModal()">
+          ➕
+        </button>
+        <div *ngIf="loading" class="spinner-border text-light" role="status" style="width: 1.5rem; height: 1.5rem;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
     </div>
     <div class="card-body p-0">
@@ -93,6 +58,54 @@
           <p class="text-muted text-center mb-0">Aucune absence trouvée.</p>
         </div>
       </ng-template>
+    </div>
+  </div>
+
+  <!-- marquer absence Modal -->
+  <div class="modal-backdrop fade show" *ngIf="showModal" style="z-index: 1040;"></div>
+
+  <div class="modal d-block"
+     *ngIf="showModal"
+     tabindex="-1"
+     [ngClass]="{ 'fade-in-modal': !isClosing, 'fade-out-modal': isClosing }"
+     style="background: rgba(0, 0, 0, 0.5); z-index: 1050;">
+     
+  <div class="modal-dialog modal-lg"
+       [ngClass]="{ 'slide-down-modal': !isClosing, 'slide-up-modal': isClosing }">
+       
+    <div class="modal-content">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="modal-header bg-secondary text-white">
+            <h5 class="modal-title"> Marquer une absence</h5>
+            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body bg-light">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Employé</label>
+                <select class="form-select" formControlName="employeId">
+                  <option value="" disabled>-- Sélectionner un employé --</option>
+                  <option *ngFor="let emp of employes" [value]="emp.id">{{ emp.nom }}</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Motif</label>
+                <input type="text" class="form-control" formControlName="motif" placeholder="Ex: Maladie" />
+              </div>
+              <div class="col-md-4 d-flex align-items-center">
+                <div class="form-check mt-3">
+                  <input type="checkbox" class="form-check-input" formControlName="justifiee" />
+                  <label class="form-check-label">Justifiée ?</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">✅ Marquer comme absent</button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
