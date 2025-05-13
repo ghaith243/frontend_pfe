@@ -18,27 +18,46 @@ export class DashboardComponent implements OnInit {
     title: string;
     data: ChartConfiguration['data'];
     options?: ChartConfiguration['options'];
-
   }[] = [];
-  // Ajoutez ces variables dans votre classe
-employeeStats = {
-  totalConges: 0,
-  approuves: 0,
-  rejetes: 0,
-  enAttente: 0
-};
+  
+  // Statistiques pour l'employé
+  employeeStats = {
+    totalConges: 0,
+    approuves: 0,
+    rejetes: 0,
+    enAttente: 0
+  };
 
-chefStats = {
-  totalCongesService: 0,
-  approuvesService: 0,
-  rejetesService: 0,
-  enAttenteService: 0,
-  demandesCeMois: 0
-};
+  // Statistiques pour le chef
+  chefStats = {
+    totalCongesService: 0,
+    approuvesService: 0,
+    rejetesService: 0,
+    enAttenteService: 0,
+    demandesCeMois: 0
+  };
   
   currentRole: string = '';
   isLoading: boolean = true;
   errorMessage: string | null = null;
+
+  // Couleurs du logo Arabsoft
+  arabsoftColors = {
+    blue: '#0052B4',      // Bleu du logo
+    orange: '#F39C12',    // Orange/doré du logo
+    gray: '#6C757D',      // Gris du logo
+    lightBlue: '#3498DB', // Version plus claire du bleu
+    lightOrange: '#FFB74D' // Version plus claire de l'orange
+  };
+
+  // Palette de couleurs basée sur le logo
+  chartColors = [
+    this.arabsoftColors.blue,
+    this.arabsoftColors.orange,
+    this.arabsoftColors.gray,
+    this.arabsoftColors.lightBlue,
+    this.arabsoftColors.lightOrange
+  ];
 
   constructor(
     private statsService: ChartService,
@@ -60,16 +79,15 @@ chefStats = {
 
     if (this.currentRole === 'ADMIN') {
       this.loadAdminStats();
-    } if (this.currentRole === 'CHEF') {
+    } else if (this.currentRole === 'CHEF') {
       this.loadChefStats();
     } else if (this.currentRole === 'EMPLOYE') {
       this.loadEmployeeStats();
-    } 
-   
+    }
   }
 
   // Fonction pour charger les statistiques de l'admin
- private loadAdminStats(): void {
+  private loadAdminStats(): void {
     this.statsService.getAdminStats().subscribe(
       (data) => {
         if (data) {
@@ -78,11 +96,11 @@ chefStats = {
               type: 'pie',
               title: 'Répartition des types de congé',
               data: {
-                labels: data.typesConge.map((item: { type: string }) => item.type),  // Typage explicite
+                labels: data.typesConge.map((item: { type: string }) => item.type),
                 datasets: [
                   {
-                    data: data.typesConge.map((item: { count: number }) => item.count),  // Typage explicite
-                    backgroundColor: ['#36A2EB', '#FFCE56', '#FF9F40'],
+                    data: data.typesConge.map((item: { count: number }) => item.count),
+                    backgroundColor: this.chartColors,
                     borderWidth: 0,
                   },
                 ],
@@ -93,11 +111,11 @@ chefStats = {
               type: 'bar',
               title: 'Taux d\'occupation par service',
               data: {
-                labels: data.occupationParService.map((item: { service: string }) => item.service),  // Typage explicite
+                labels: data.occupationParService.map((item: { service: string }) => item.service),
                 datasets: [
                   {
-                    data: data.occupationParService.map((item: { total: number }) => item.total),  // Typage explicite
-                    backgroundColor: '#4BC0C0',
+                    data: data.occupationParService.map((item: { total: number }) => item.total),
+                    backgroundColor: this.arabsoftColors.blue,
                   },
                 ],
               },
@@ -105,13 +123,13 @@ chefStats = {
             },
           ];
         }
+        this.isLoading = false;
       },
       (error) => {
         this.handleError('Erreur lors du chargement des données Admin');
       }
     );
   }
-
 
   // Fonction pour charger les statistiques du chef
   private loadChefStats(): void {
@@ -153,7 +171,7 @@ chefStats = {
                 labels: safeData.typesCongeService.map((item: any) => item.type || 'Inconnu'),
                 datasets: [{
                   data: safeData.typesCongeService.map((item: any) => item.count || 0),
-                  backgroundColor: ['#36A2EB', '#FFCE56', '#FF9F40', '#4BC0C0', '#9966FF'],
+                  backgroundColor: this.chartColors,
                   borderWidth: 0,
                 }],
               },
@@ -169,8 +187,8 @@ chefStats = {
                 labels: safeData.demandesMensuelles.map((item: any) => `Mois ${item.mois}`),
                 datasets: [{
                   data: safeData.demandesMensuelles.map((item: any) => item.count || 0),
-                  backgroundColor: '#FF6384',
-                  borderColor: '#FF6384',
+                  backgroundColor: this.arabsoftColors.blue,
+                  borderColor: this.arabsoftColors.blue,
                   fill: false,
                 }],
               },
@@ -200,10 +218,11 @@ chefStats = {
       (data) => {
         if (data) {
           // Calcul des totaux pour les cartes
-          this.employeeStats.totalConges = data.congesStats.Approuvés+data.congesStats.Rejetés +data.congesStats['En attente'] || 0;
+          this.employeeStats.totalConges = data.congesStats.Approuvés + data.congesStats.Rejetés + data.congesStats['En attente'] || 0;
           this.employeeStats.approuves = data.congesStats.Approuvés || 0;
           this.employeeStats.rejetes = data.congesStats.Rejetés || 0;
           this.employeeStats.enAttente = data.congesStats['En attente'] || 0;
+          
           const conges = { paid: 0, rtt: 0, sick: 0, sansSolde: 0, maternite: 0 };
           data.soldeConge.forEach((item: { type: string, jours: number }) => {
             switch (item.type) {
@@ -219,7 +238,7 @@ chefStats = {
               case 'Sans Solde':
                 conges.sansSolde = item.jours;
                 break;
-              case 'Maternité': // Ajoutez ce cas pour la maternité
+              case 'Maternité':
                 conges.maternite = item.jours;
                 break;
               default:
@@ -227,17 +246,16 @@ chefStats = {
             }
           });
           
-  
           this.charts = [
             {
               type: 'pie',
               title: 'Vos congés utilisés',
               data: {
-                labels: ['Congés payés', 'RTT', 'Maladie', 'Sans solde', 'Maternité'], // Ajout de 'Maternité'
+                labels: ['Congés payés', 'RTT', 'Maladie', 'Sans solde', 'Maternité'],
                 datasets: [
                   {
-                    data: [conges.paid, conges.rtt, conges.sick, conges.sansSolde, conges.maternite], // Ajout de 'conges.maternite'
-                    backgroundColor: ['#36A2EB', '#9966FF', '#FF9F40', '#FF5733', '#FF4081'], // Ajout d'une couleur pour 'Maternité'
+                    data: [conges.paid, conges.rtt, conges.sick, conges.sansSolde, conges.maternite],
+                    backgroundColor: this.chartColors,
                     borderWidth: 0,
                   },
                 ],
@@ -256,7 +274,11 @@ chefStats = {
                       data.congesStats.Rejetés,
                       data.congesStats['En attente'],
                     ],
-                    backgroundColor: ['#4CAF50', '#FF0000', '#FFC107'],
+                    backgroundColor: [
+                      this.arabsoftColors.blue,
+                      this.arabsoftColors.orange,
+                      this.arabsoftColors.gray
+                    ],
                     borderWidth: 0,
                   },
                 ],
@@ -265,6 +287,7 @@ chefStats = {
             },
           ];
         }
+        this.isLoading = false;
       },
       (error) => {
         this.handleError('Erreur lors du chargement des données Employé');
@@ -309,7 +332,6 @@ chefStats = {
           padding: 12
         }
       },
-      // Correction: placez cutout dans elements.arc
       elements: {
         arc: {
           borderWidth: 0,
@@ -323,8 +345,8 @@ chefStats = {
   private handleError(message: string): void {
     this.errorMessage = message;
     this.isLoading = false;
- 
   }
+  
   refreshData(): void {
     this.loadDashboardData();
   }

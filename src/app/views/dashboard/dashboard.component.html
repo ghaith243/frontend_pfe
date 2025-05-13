@@ -60,40 +60,33 @@
   </div>
 
   <!-- Indicateur de chargement -->
-  @if (isLoading) {
-    <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i> Chargement des données...
-    </div>
-  }
+  <div *ngIf="isLoading" class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+  </div>
 
   <!-- Message d'erreur -->
-  @if (errorMessage) {
-    <div class="error-message">
-      <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
-    </div>
-  }
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+  </div>
 
   <!-- Conteneur des graphiques -->
   <div class="charts-grid">
-    @if (charts.length > 0) {
-      @for (chart of charts; track chart.title) {
-        <div class="chart-card">
-          <h3>{{ chart.title }}</h3>
-          <div class="chart-container">
-            <canvas baseChart
-              [type]="chart.type"
-              [data]="chart.data"
-              [options]="chart.options">
-            </canvas>
-          </div>
+    <ng-container *ngIf="charts.length > 0; else noData">
+      <div *ngFor="let chart of charts" class="chart-card">
+        <h3>{{ chart.title }}</h3>
+        <div class="chart-container">
+          <canvas baseChart
+            [type]="chart.type"
+            [data]="chart.data"
+            [options]="chart.options">
+          </canvas>
         </div>
-      }
-    } @else {
-      @if (!isLoading && !errorMessage) {
-        <div class="no-data-message">
-          <i class="fas fa-chart-pie"></i> Aucune donnée disponible pour les graphiques
-        </div>
-      }
-    }
+      </div>
+    </ng-container>
+    <ng-template #noData>
+      <div *ngIf="!isLoading && !errorMessage" class="no-data-message">
+        <i class="fas fa-chart-pie"></i> Aucune donnée disponible pour les graphiques
+      </div>
+    </ng-template>
   </div>
 </div>

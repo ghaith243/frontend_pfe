@@ -1,4 +1,115 @@
-<div>
-    <h2>Mon calendrier de congés</h2>
+<div class="calendar-container">
+  <div class="calendar-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-calendar-alt"></i> Mon calendrier de congés</h2>
+      <div class="calendar-actions">
+        <button class="btn btn-outline-primary btn-sm me-2" (click)="refreshCalendar()">
+          <i class="fas fa-sync-alt"></i> Actualiser
+        </button>
+      <button class="btn btn-primary btn-sm" [routerLink]="'/demande'">
+  <i class="fas fa-plus"></i> Nouvelle demande
+</button>
+
+      </div>
+    </div>
+
+    <!-- Légende des statuts -->
+    <div class="calendar-legend mb-4">
+      <div class="legend-title">Statut des congés:</div>
+      <div class="legend-items">
+        <div class="legend-item">
+          <span class="legend-color" style="background-color: #0052B4;"></span>
+          <span>En attente</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background-color: #4CAF50;"></span>
+          <span>Approuvé</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background-color: #F39C12;"></span>
+          <span>En cours</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background-color: #FF5252;"></span>
+          <span>Rejeté</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p>Chargement de votre calendrier...</p>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i> {{ errorMessage }}
+  </div>
+
+  <!-- Aucun congé -->
+  <div *ngIf="!isLoading && userConges.length === 0" class="no-data-message">
+    <i class="fas fa-calendar-times"></i>
+    <p>Aucun congé trouvé dans votre calendrier</p>
+    <button class="btn btn-primary" routerLink="/demande-conge">Demander un congé</button>
+  </div>
+
+  <!-- Calendrier -->
+  <div *ngIf="!isLoading && userConges.length > 0" class="calendar-wrapper">
     <full-calendar [options]="calendarOptions"></full-calendar>
   </div>
+
+  <!-- Résumé des congés -->
+  <div *ngIf="!isLoading && userConges.length > 0" class="calendar-summary mt-4">
+    <h4>Résumé de vos congés</h4>
+    <div class="row">
+      <div class="col-md-3 col-sm-6">
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="summary-content">
+            <h5>Total</h5>
+            <p>{{ userConges.length }} congés</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="summary-card">
+          <div class="summary-icon approved">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="summary-content">
+            <h5>Approuvés</h5>
+            <p>{{ getCongesByStatus('APPROUVE').length }} congés</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="summary-card">
+          <div class="summary-icon pending">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="summary-content">
+            <h5>En attente</h5>
+            <p>{{ getCongesByStatus('EN_ATTENTE').length }} congés</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="summary-card">
+          <div class="summary-icon rejected">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <div class="summary-content">
+            <h5>Rejetés</h5>
+            <p>{{ getCongesByStatus('REJETE').length }} congés</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
