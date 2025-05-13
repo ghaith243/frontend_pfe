@@ -132,10 +132,10 @@ export class CalendrierComponent implements OnInit {
           color = '#FF5252'; // Rouge
           break;
         case 'EN_ATTENTE':
-          color = this.arabsoftColors.blue; // Bleu Arabsoft
+          color = this.arabsoftColors.orange // Bleu Arabsoft
           break;
         default:
-          color = this.arabsoftColors.gray; // Gris par défaut
+          color = this.arabsoftColors.orange; // Gris par défaut
       }
 
       // Vérifier si le congé est en cours
