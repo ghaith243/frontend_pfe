@@ -60,15 +60,25 @@ export class NotificationsService {
     this.stompClient.activate();
   }
 
-  private addNotification(notification: any) {
-    if (!notification.read) {
-      const currentNotifications = this.notificationsSubject.value;
-      // Créez un nouveau tableau avec la nouvelle notification
-      const updatedNotifications = [notification, ...currentNotifications];
-      // Émettez le nouveau tableau
-      this.notificationsSubject.next(updatedNotifications);
+private addNotification(notification: any) {
+    try {
+        // Si la notification est une chaîne JSON, la parser
+        const parsedNotification = typeof notification === 'string' ? 
+         JSON.parse(notification) :  notification;
+        
+        if (!parsedNotification.read) {
+            const currentNotifications = this.notificationsSubject.value;
+            // S'assurer que la notification a une date valide
+            if (!parsedNotification.createdAt) {
+                parsedNotification.createdAt = new Date().toISOString();
+            }
+            const updatedNotifications = [parsedNotification, ...currentNotifications];
+            this.notificationsSubject.next(updatedNotifications);
+        }
+    } catch (error) {
+        console.error('Erreur de traitement de la notification:', error, notification);
     }
-  }
+}
   
   
 

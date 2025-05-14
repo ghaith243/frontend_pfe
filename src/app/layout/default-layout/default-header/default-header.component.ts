@@ -125,24 +125,29 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
   }
 
   formatNotificationTime(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
+    if (!dateString) return 'Maintenant';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Maintenant';
+        
+        const now = new Date();
+        const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
 
-    if (date.toDateString() === now.toDateString()) {
-      return `Aujourd'hui à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+        if (diffInMinutes < 1) return 'À l\'instant';
+        if (diffInMinutes < 60) return `Il y a ${diffInMinutes} min`;
+        if (diffInMinutes < 1440) return `Il y a ${Math.floor(diffInMinutes / 60)} h`;
+        
+        return date.toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (e) {
+        return 'Maintenant';
     }
-
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-
-    if (date.toDateString() === yesterday.toDateString()) {
-      return `Hier à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-  }
-  
-
+}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
