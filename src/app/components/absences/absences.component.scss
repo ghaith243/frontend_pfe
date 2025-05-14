@@ -1,9 +1,177 @@
-.icon {
-    width:  0.5rem;
-    height: 0.5rem;
-    vertical-align: middle; /* Aligns the icon in the middle of the text */
-  }
+// Variables des couleurs Arabsoft
+$arabsoft-blue: #0052B4;
+$arabsoft-orange: #F39C12;
+$arabsoft-gray: #6C757D;
+$arabsoft-light-blue: #3498DB;
+$arabsoft-light-orange: #FFB74D;
+$arabsoft-light-gray: #E9ECEF;
 
+// Couleurs supplémentaires
+$success-color: #4CAF50;
+$danger-color: #FF5252;
+$white: #FFFFFF;
+
+// Styles généraux
+.arabsoft-title {
+  color: $arabsoft-blue;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.page-header {
+  border-bottom: 2px solid $arabsoft-light-blue;
+  padding-bottom: 0.5rem;
+}
+
+// Cartes
+.arabsoft-card {
+  border: none;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.arabsoft-card-header {
+  background-color: $arabsoft-blue;
+  color: $white;
+  padding: 1rem;
+  border-bottom: none;
+}
+
+.filter-card {
+  background-color: $arabsoft-light-gray;
+  border-radius: 0.5rem;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+// Tableau
+.arabsoft-table-header {
+  background-color: $arabsoft-blue;
+  color: $white;
+  
+  th {
+    font-weight: 500;
+    border-bottom: none;
+    padding: 0.75rem 1rem;
+  }
+}
+
+table.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  
+  tbody tr {
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: rgba($arabsoft-light-blue, 0.1);
+    }
+  }
+  
+  td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+  }
+}
+
+// Badges
+.arabsoft-badge-success {
+  background-color: $success-color;
+  color: $white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.arabsoft-badge-danger {
+  background-color: $danger-color;
+  color: $white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+// Boutons
+.arabsoft-btn-primary {
+  background-color: $arabsoft-blue;
+  border-color: $arabsoft-blue;
+  color: $white;
+  
+  &:hover, &:active, &:focus {
+    background-color: darken($arabsoft-blue, 10%);
+    border-color: darken($arabsoft-blue, 10%);
+    color: $white;
+  }
+  
+  &:disabled {
+    background-color: lighten($arabsoft-blue, 20%);
+    border-color: lighten($arabsoft-blue, 20%);
+  }
+}
+
+.arabsoft-btn-secondary {
+  background-color: $arabsoft-orange;
+  border-color: $arabsoft-orange;
+  color: $white;
+  
+  &:hover, &:active, &:focus {
+    background-color: darken($arabsoft-orange, 10%);
+    border-color: darken($arabsoft-orange, 10%);
+    color: $white;
+  }
+}
+
+// Formulaires
+.arabsoft-select, .arabsoft-input {
+  border: 1px solid $arabsoft-gray;
+  border-radius: 0.375rem;
+  
+  &:focus {
+    border-color: $arabsoft-blue;
+    box-shadow: 0 0 0 0.25rem rgba($arabsoft-blue, 0.25);
+  }
+}
+
+.arabsoft-checkbox {
+  .form-check-input:checked {
+    background-color: $arabsoft-blue;
+    border-color: $arabsoft-blue;
+  }
+  
+  .form-check-input:focus {
+    border-color: $arabsoft-blue;
+    box-shadow: 0 0 0 0.25rem rgba($arabsoft-blue, 0.25);
+  }
+}
+
+// Modal
+.arabsoft-modal {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.arabsoft-modal-header {
+  background-color: $arabsoft-blue;
+  color: $white;
+  border-bottom: none;
+}
+
+// Message vide
+.arabsoft-icon-empty {
+  font-size: 3rem;
+  color: $arabsoft-gray;
+  opacity: 0.5;
+  display: block;
+}
+
+// Animations
 .fade-in-modal {
   animation: fadeIn 0.3s ease forwards;
 }
@@ -50,5 +218,22 @@
   to {
     transform: translateY(-50px);
     opacity: 0;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .arabsoft-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    h5 {
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  .arabsoft-badge-success, .arabsoft-badge-danger {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
   }
 }

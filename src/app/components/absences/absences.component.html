@@ -1,37 +1,50 @@
 <div class="container my-4">
+  <!-- Titre de la page -->
+  <div class="page-header mb-4">
+    <h4 class="arabsoft-title"><i class="fas fa-calendar-times me-2"></i>Gestion des absences</h4>
+  </div>
+
   <!-- Filtres -->
-  <div class="row mb-4">
-    <div class="col-md-6">
-      <label> Filtrer par employé</label>
-      <select class="form-select" [(ngModel)]="filtreEmployeId" (change)="filtrerAbsences()">
-        <option value="">Tous les employés</option>
-        <option *ngFor="let emp of employes" [value]="emp.id">{{ emp.nom }}</option>
-      </select>
-    </div>
-    <div class="col-md-6">
-      <label> Filtrer par date</label>
-      <input type="date" class="form-control" [(ngModel)]="filtreDate" (change)="filtrerAbsences()" />
+  <div class="card filter-card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <label class="form-label fw-bold"><i class="fas fa-user me-1"></i> Filtrer par employé</label>
+          <select class="form-select arabsoft-select" [(ngModel)]="filtreEmployeId" (change)="filtrerAbsences()">
+            <option value="">Tous les employés</option>
+            <option *ngFor="let emp of employes" [value]="emp.id">{{ emp.nom }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold"><i class="fas fa-calendar-day me-1"></i> Filtrer par date</label>
+          <input type="date" class="form-control arabsoft-input" [(ngModel)]="filtreDate" (change)="filtrerAbsences()" />
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Liste des absences -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-      <h5 class="mb-0"> Liste des absences</h5>
+  <div class="card arabsoft-card shadow">
+    <div class="card-header arabsoft-card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="fas fa-list me-2"></i>Liste des absences</h5>
       <div>
-        <button class="btn btn-light btn-sm me-2" (click)="openModal()">
-          ➕
+        <button class="btn arabsoft-btn-secondary me-2" (click)="openModal()">
+          <i class="fas fa-plus"></i> Ajouter
         </button>
-        <div *ngIf="loading" class="spinner-border text-light" role="status" style="width: 1.5rem; height: 1.5rem;">
-          <span class="visually-hidden">Loading...</span>
+        <div *ngIf="loading" class="spinner-border spinner-border-sm text-light" role="status">
+          <span class="visually-hidden">Chargement...</span>
         </div>
       </div>
     </div>
     <div class="card-body p-0">
-      <table class="table table-striped mb-0" *ngIf="filteredAbsences.length > 0; else noAbsences">
-        <thead class="table-dark">
+      <table class="table table-hover mb-0" *ngIf="filteredAbsences.length > 0; else noAbsences">
+        <thead class="arabsoft-table-header">
           <tr>
-            <th (click)="trierParNom()" style="cursor: pointer">Employé ⬍</th>
+            <th (click)="trierParNom()" style="cursor: pointer">
+              <div class="d-flex align-items-center">
+                Employé <i class="fas fa-sort ms-1"></i>
+              </div>
+            </th>
             <th>Date</th>
             <th>Motif</th>
             <th>Justifiée</th>
@@ -44,8 +57,9 @@
             <td>{{ absence.date | date: 'dd/MM/yyyy' }}</td>
             <td>{{ absence.motif }}</td>
             <td>
-              <span [ngClass]="absence.justifiee ? 'text-success' : 'text-danger'">
-                {{ absence.justifiee ? '✅ Oui' : '❌ Non' }}
+              <span class="badge" [ngClass]="absence.justifiee ? 'arabsoft-badge-success' : 'arabsoft-badge-danger'">
+                <i [class]="absence.justifiee ? 'fas fa-check-circle me-1' : 'fas fa-times-circle me-1'"></i>
+                {{ absence.justifiee ? 'Justifiée' : 'Non justifiée' }}
               </span>
             </td>
             <td>{{ absence.chef?.nom || 'N/A' }}</td>
@@ -54,14 +68,15 @@
       </table>
 
       <ng-template #noAbsences>
-        <div class="p-3">
-          <p class="text-muted text-center mb-0">Aucune absence trouvée.</p>
+        <div class="p-4 text-center">
+          <i class="fas fa-calendar-times arabsoft-icon-empty mb-3"></i>
+          <p class="text-muted mb-0">Aucune absence trouvée.</p>
         </div>
       </ng-template>
     </div>
   </div>
 
-  <!-- marquer absence Modal -->
+  <!-- Modal pour marquer une absence -->
   <div class="modal-backdrop fade show" *ngIf="showModal" style="z-index: 1040;"></div>
 
   <div class="modal d-block"
@@ -70,39 +85,56 @@
      [ngClass]="{ 'fade-in-modal': !isClosing, 'fade-out-modal': isClosing }"
      style="background: rgba(0, 0, 0, 0.5); z-index: 1050;">
      
-  <div class="modal-dialog modal-lg"
-       [ngClass]="{ 'slide-down-modal': !isClosing, 'slide-up-modal': isClosing }">
-       
-    <div class="modal-content">
+    <div class="modal-dialog modal-lg"
+         [ngClass]="{ 'slide-down-modal': !isClosing, 'slide-up-modal': isClosing }">
+         
+      <div class="modal-content arabsoft-modal">
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <div class="modal-header bg-secondary text-white">
-            <h5 class="modal-title"> Marquer une absence</h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fermer"></button>
+          <div class="modal-header arabsoft-modal-header">
+            <h5 class="modal-title"><i class="fas fa-user-clock me-2"></i>Marquer une absence</h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Fermer"></button>
           </div>
-          <div class="modal-body bg-light">
+          <div class="modal-body">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="form-label">Employé</label>
-                <select class="form-select" formControlName="employeId">
+                <label class="form-label fw-bold">Employé</label>
+                <select class="form-select arabsoft-select" formControlName="employeId">
                   <option value="" disabled>-- Sélectionner un employé --</option>
                   <option *ngFor="let emp of employes" [value]="emp.id">{{ emp.nom }}</option>
                 </select>
+                <div *ngIf="form.get('employeId')?.invalid && form.get('employeId')?.touched" class="text-danger mt-1">
+                  <small>Veuillez sélectionner un employé</small>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Motif</label>
-                <input type="text" class="form-control" formControlName="motif" placeholder="Ex: Maladie" />
+                <label class="form-label fw-bold">Motif</label>
+                <input type="text" class="form-control arabsoft-input" formControlName="motif" placeholder="Ex: Maladie" />
+                <div *ngIf="form.get('motif')?.invalid && form.get('motif')?.touched" class="text-danger mt-1">
+                  <small>Veuillez indiquer un motif</small>
+                </div>
               </div>
-              <div class="col-md-4 d-flex align-items-center">
-                <div class="form-check mt-3">
-                  <input type="checkbox" class="form-check-input" formControlName="justifiee" />
-                  <label class="form-check-label">Justifiée ?</label>
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Date</label>
+                <input type="date" class="form-control arabsoft-input" formControlName="date" />
+                <div *ngIf="form.get('date')?.invalid && form.get('date')?.touched" class="text-danger mt-1">
+                  <small>Veuillez sélectionner une date</small>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-check arabsoft-checkbox">
+                  <input type="checkbox" class="form-check-input" id="justifiee" formControlName="justifiee" />
+                  <label class="form-check-label" for="justifiee">Absence justifiée</label>
                 </div>
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn btn-success">✅ Marquer comme absent</button>
-            <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+            <button type="button" class="btn arabsoft-btn-secondary" (click)="closeModal()">
+              <i class="fas fa-times me-1"></i> Annuler
+            </button>
+            <button type="submit" class="btn arabsoft-btn-primary" [disabled]="form.invalid">
+              <i class="fas fa-save me-1"></i> Enregistrer
+            </button>
           </div>
         </form>
       </div>
