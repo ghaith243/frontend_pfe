@@ -212,88 +212,110 @@ export class DashboardComponent implements OnInit {
   }
 
   // Fonction pour charger les statistiques de l'employé
-  private loadEmployeeStats(): void {
+private loadEmployeeStats(): void {
     const userId = this.authService.getUserId();
     this.statsService.getEmployeStats(userId).subscribe(
-      (data) => {
-        if (data) {
-          // Calcul des totaux pour les cartes
-          this.employeeStats.totalConges = data.congesStats.Approuvés + data.congesStats.Rejetés + data.congesStats['En attente'] || 0;
-          this.employeeStats.approuves = data.congesStats.Approuvés || 0;
-          this.employeeStats.rejetes = data.congesStats.Rejetés || 0;
-          this.employeeStats.enAttente = data.congesStats['En attente'] || 0;
-          
-          const conges = { paid: 0, rtt: 0, sick: 0, sansSolde: 0, maternite: 0 };
-          data.soldeConge.forEach((item: { type: string, jours: number }) => {
-            switch (item.type) {
-              case 'Annuelle':
-                conges.paid = item.jours;
-                break;
-              case 'RTT':
-                conges.rtt = item.jours;
-                break;
-              case 'Maladie':
-                conges.sick = item.jours;
-                break;
-              case 'Sans Solde':
-                conges.sansSolde = item.jours;
-                break;
-              case 'Maternité':
-                conges.maternite = item.jours;
-                break;
-              default:
-                break;
+        (data) => {
+            if (data) {
+                // Calcul des totaux pour les cartes
+                this.employeeStats.totalConges = data.congesStats.Approuvés + data.congesStats.Rejetés + data.congesStats['En attente'] || 0;
+                this.employeeStats.approuves = data.congesStats.Approuvés || 0;
+                this.employeeStats.rejetes = data.congesStats.Rejetés || 0;
+                this.employeeStats.enAttente = data.congesStats['En attente'] || 0;
+
+                // Debug: Afficher les données reçues
+                console.log('Données soldeConge:', data.soldeConge);
+
+                const conges = { 
+                    paid: 0,    // Pour "Congés payés"
+                    annuelle: 0,  // Pour "Annuelle"
+                    rtt: 0, 
+                    maladie: 0, 
+                    sansSolde: 0, 
+                    maternite: 0 
+                };
+
+                data.soldeConge.forEach((item: { type: string, jours: number }) => {
+                    console.log('Traitement du type:', item.type, 'jours:', item.jours);
+
+                    switch (item.type) {
+                        case 'Congés payés':
+                            conges.paid += item.jours;
+                            break;
+                      
+                      
+                        case 'Maladie':
+                            conges.maladie = item.jours;
+                            break;
+                        case 'Sans Solde':
+                            conges.sansSolde = item.jours;
+                            break;
+                        case 'Maternité':
+                            conges.maternite = item.jours;
+                            break;
+                        default:
+                            console.warn('Type de congé non géré:', item.type);
+                            break;
+                    }
+                });
+
+                // Debug: Afficher les totaux calculés
+                console.log('Totaux calculés:', conges);
+
+                this.charts = [
+                    {
+                        type: 'pie',
+                        title: 'Vos congés utilisés',
+                        data: {
+                            labels: ['Congés payés', 'Maladie', 'Sans solde', 'Maternité'],
+                            datasets: [
+                                {
+                                    data: [
+                                        conges.paid,
+                                       
+                                          conges.maladie,
+                                        conges.sansSolde,
+                                        conges.maternite
+                                    ],
+                                    backgroundColor: this.chartColors,
+                                    borderWidth: 0,
+                                },
+                            ],
+                        },
+                        options: this.getChartOptions(),
+                    },
+                    {
+                        type: 'pie',
+                        title: 'Statut des congés',
+                        data: {
+                            labels: ['Approuvés', 'Rejetés', 'En attente'],
+                            datasets: [
+                                {
+                                    data: [
+                                        data.congesStats.Approuvés,
+                                        data.congesStats.Rejetés,
+                                        data.congesStats['En attente'],
+                                    ],
+                                    backgroundColor: [
+                                        this.arabsoftColors.blue,
+                                        this.arabsoftColors.orange,
+                                        this.arabsoftColors.gray
+                                    ],
+                                    borderWidth: 0,
+                                },
+                            ],
+                        },
+                        options: this.getChartOptions(),
+                    },
+                ];
             }
-          });
-          
-          this.charts = [
-            {
-              type: 'pie',
-              title: 'Vos congés utilisés',
-              data: {
-                labels: ['Congés payés', 'RTT', 'Maladie', 'Sans solde', 'Maternité'],
-                datasets: [
-                  {
-                    data: [conges.paid, conges.rtt, conges.sick, conges.sansSolde, conges.maternite],
-                    backgroundColor: this.chartColors,
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: this.getChartOptions(),
-            },
-            {
-              type: 'pie',
-              title: 'Statut des congés',
-              data: {
-                labels: ['Approuvés', 'Rejetés', 'En attente'],
-                datasets: [
-                  {
-                    data: [
-                      data.congesStats.Approuvés,
-                      data.congesStats.Rejetés,
-                      data.congesStats['En attente'],
-                    ],
-                    backgroundColor: [
-                      this.arabsoftColors.blue,
-                      this.arabsoftColors.orange,
-                      this.arabsoftColors.gray
-                    ],
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: this.getChartOptions(),
-            },
-          ];
+            this.isLoading = false;
+        },
+        (error) => {
+            this.handleError('Erreur lors du chargement des données Employé');
         }
-        this.isLoading = false;
-      },
-      (error) => {
-        this.handleError('Erreur lors du chargement des données Employé');
-      }
     );
-  }
+}
   
   // Fonction pour obtenir les options du graphique
   private getChartOptions(): ChartConfiguration['options'] {
