@@ -51,8 +51,11 @@ export class NotificationsService {
       const userId = localStorage.getItem('userId');
       if (userId) {
         this.stompClient.subscribe(`/topic/user/${userId}`, (message) => {
+          const parsed = JSON.parse(message.body); // ✅ parse the string
+          this.notificationsSubject.next([parsed, ...this.notificationsSubject.value]);
+          console.log("🧪 Raw WebSocket message:", message);
+          console.log("🧪 Body:", message.body);
           console.log('📩 Notification utilisateur reçue:', message.body);
-          this.addNotification(message.body);
         });
       }
     };

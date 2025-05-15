@@ -25,15 +25,26 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
 ngOnInit(): void {
   // 🔥 Immediate load of current notifications
-  const initialSub = this.notificationsService.getNotifications().subscribe({
+  // const initialSub = this.notificationsService.getNotifications().subscribe({
+  //   next: (notifications) => {
+  //     this.notifications = notifications;
+  //     this.unreadNotificationsCount = notifications.filter(n => !n.read).length;
+  //   },
+  //   error: (err) => console.error('❌ Erreur lors du chargement initial des notifications:', err)
+  // });
+
+   const realtimeSub = this.notificationsService.notifications$.subscribe({
     next: (notifications) => {
-      this.notifications = notifications;
+      this.notifications = notifications.map(n => {
+      console.log('Notification date raw:', n.createdAt); // or whatever your date field is called
+      return n;
+      });
       this.unreadNotificationsCount = notifications.filter(n => !n.read).length;
     },
-    error: (err) => console.error('❌ Erreur lors du chargement initial des notifications:', err)
+    error: (err) => console.error('❌ Erreur WebSocket notifications:', err)
   });
 
-  this.subscriptions.add(initialSub);
+  this.subscriptions.add(realtimeSub);
 
   // 🔁 Polling every 10 seconds
   const pollSub = interval(10000) // every 10s
@@ -56,21 +67,32 @@ ngOnInit(): void {
     this.subscriptions.unsubscribe(); // ✅ Nettoyage mémoire
   }
 
-  formatNotificationTime(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
+formatNotificationTime(dateString: string): string {
+  if (!dateString) return 'Date invalide';
 
-    if (date.toDateString() === now.toDateString()) {
-      return `Aujourd'hui à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-
-    if (date.toDateString() === yesterday.toDateString()) {
-      return `Hier à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    console.warn('⚠️ Date parsing failed for:', dateString);
+    return 'Date invalide';
   }
+
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+  if (isToday) {
+    return `- Aujourd'hui à ${hours}:${minutes}`;
+  } else if (isYesterday) {
+    return `- Hier à ${hours}:${minutes}`;
+  } else {
+    return `- ${date.toLocaleDateString()} à ${hours}:${minutes}`;
+  }
+}
+
+
 }
