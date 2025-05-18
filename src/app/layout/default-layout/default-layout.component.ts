@@ -75,7 +75,20 @@ export class DefaultLayoutComponent implements OnInit  {
     if (token) {
       this.authService.getEmployeeData(token).subscribe(
         (data) => {
+
           this.role = data.role;
+
+          console.log('Données utilisateur reçues:', data);
+
+          this.role = data.role; // Récupérer le rôle de l'utilisateur depuis la réponse de l'API
+          console.log('Rôle validé :', this.role);
+
+           if (data.id) {
+          localStorage.setItem('userId', data.id.toString());
+          console.log('User ID stored in localStorage:', data.id);
+          } else {
+            console.warn('ID utilisateur non trouvé dans les données');
+          }
           if (data.serviceId) {
             localStorage.setItem('serviceId', data.serviceId.toString());
           }
