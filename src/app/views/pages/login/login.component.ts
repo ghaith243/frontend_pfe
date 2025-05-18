@@ -26,20 +26,19 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  onSubmit(): void {
-    this.authService.login(this.credentials).subscribe(
-      (response: any) => {
-        localStorage.setItem('token', response.token);// Stocker le token JWT
-        localStorage.setItem('role', response.role);
-        localStorage.setItem('userEmail', this.credentials.email);
-        this.router.navigateByUrl('/dashboard');// Rediriger vers le profil
-      },
-      (error) => {
-        console.error('Erreur de connexion', error);
-        alert('Email ou mot de passe incorrect');
-      }
-    );
-  }
+onSubmit(): void {
+  this.authService.login(this.credentials).subscribe(
+    (response: any) => {
+      // Pas besoin de remettre localStorage ici, déjà fait dans tap
+      this.router.navigateByUrl('/dashboard');
+    },
+    (error) => {
+      console.error('Erreur de connexion', error);
+      alert('Email ou mot de passe incorrect');
+    }
+  );
+}
+
 
 }
  

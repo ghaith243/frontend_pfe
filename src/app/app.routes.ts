@@ -43,6 +43,7 @@ export const routes: Routes = [
       {path:'mesabsences',component:EmployeAbsenceComponent},
       {path:'users',component:ListeUserComponent},
       {path:'all-conges',component:ListeAllcongeComponent},
+      {path:'Notification',component:NotificationComponent},
    
      
     

@@ -1,76 +1,94 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from 'app/services/authservice.service';
-import { AppNotification, NotificationsService} from 'app/services/notifications.service';
-import { interval, Subscription, switchMap } from 'rxjs';
+import { CommonModule } from "@angular/common"
+import { Component, type OnInit, type OnDestroy } from "@angular/core"
+import { FormsModule } from "@angular/forms"
+import { AuthService } from "app/services/authservice.service"
+import  { AppNotification } from "app/services/notifications.service"
+import { NotificationsService } from "app/services/notifications.service"
+import { Subscription } from "rxjs"
 
 @Component({
-  selector: 'app-notification',
+  selector: "app-notification",
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './notification.component.html',
-  styleUrls: ['./notification.component.scss']
+  templateUrl: "./notification.component.html",
+  styleUrls: ["./notification.component.scss"],
 })
 export class NotificationComponent implements OnInit, OnDestroy {
-  notifications: AppNotification[] = [];
-  unreadNotificationsCount: number = 0;
+  notifications: AppNotification[] = []
+  unreadNotificationsCount = 0
+  isLoading = true
 
-  private subscriptions = new Subscription();
+  private subscriptions = new Subscription()
 
   constructor(
-    private notificationsService: NotificationsService, 
-    private authService: AuthService
+    private notifciationservice:NotificationsService,
+    private authService: AuthService,
   ) {}
 
-ngOnInit(): void {
-  // 🔥 Immediate load of current notifications
-  const initialSub = this.notificationsService.getNotifications().subscribe({
-    next: (notifications) => {
-      this.notifications = notifications;
-      this.unreadNotificationsCount = notifications.filter(n => !n.read).length;
-    },
-    error: (err) => console.error('❌ Erreur lors du chargement initial des notifications:', err)
-  });
-
-  this.subscriptions.add(initialSub);
-
-  // 🔁 Polling every 10 seconds
-  const pollSub = interval(10000) // every 10s
-    .pipe(
-      switchMap(() => this.notificationsService.getNotifications())
-    )
-    .subscribe({
+  ngOnInit(): void {
+    // Subscribe to real-time notifications
+    const realtimeSub = this.notifciationservice.notifications$.subscribe({
       next: (notifications) => {
-        this.notifications = notifications;
-        this.unreadNotificationsCount = notifications.filter(n => !n.read).length;
+        this.isLoading = false
+        this.notifications = notifications
+        this.unreadNotificationsCount = notifications.filter((n) => !n.read).length
       },
-      error: (err) => console.error('❌ Erreur lors du polling des notifications:', err)
-    });
+      error: (err) => {
+        this.isLoading = false
+        console.error("❌ Erreur WebSocket notifications:", err)
+      },
+    })
 
-  this.subscriptions.add(pollSub);
-}
-
+    this.subscriptions.add(realtimeSub)
+  }
 
   ngOnDestroy() {
-    this.subscriptions.unsubscribe(); // ✅ Nettoyage mémoire
+    this.subscriptions.unsubscribe() // ✅ Nettoyage mémoire
+  }
+
+  markAllAsRead() {
+    this.notifciationservice.markAllAsRead()
+  }
+
+  markAsRead(notificationId: number) {
+    if (notificationId) {
+      this.notifciationservice.markAsRead(notificationId)
+    }
   }
 
   formatNotificationTime(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
+    if (!dateString) return "Date invalide"
 
-    if (date.toDateString() === now.toDateString()) {
-      return `Aujourd'hui à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        console.warn("⚠️ Date parsing failed for:", dateString)
+        return "Date invalide"
+      }
+
+      const now = new Date()
+      const diffMs = now.getTime() - date.getTime()
+      const diffMinutes = Math.floor(diffMs / 60000)
+      const diffHours = Math.floor(diffMinutes / 60)
+      const diffDays = Math.floor(diffHours / 24)
+
+      // Format time
+      const hours = date.getHours().toString().padStart(2, "0")
+      const minutes = date.getMinutes().toString().padStart(2, "0")
+      const timeStr = `${hours}:${minutes}`
+
+      if (diffMinutes < 1) return "À l'instant"
+      if (diffMinutes < 60) return `Il y a ${diffMinutes} min`
+      if (diffHours < 24) return `Il y a ${diffHours} h`
+      if (diffDays === 1) return `Hier à ${timeStr}`
+
+      // Format date for older notifications
+      const day = date.getDate().toString().padStart(2, "0")
+      const month = (date.getMonth() + 1).toString().padStart(2, "0")
+      return `${day}/${month} à ${timeStr}`
+    } catch (error) {
+      console.error("Erreur de formatage de date:", error)
+      return "Date invalide"
     }
-
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-
-    if (date.toDateString() === yesterday.toDateString()) {
-      return `Hier à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
   }
 }

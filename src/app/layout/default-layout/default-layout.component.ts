@@ -42,10 +42,10 @@ import { HttpClient } from '@angular/common/http';
     ContainerComponent,
     RouterOutlet,
     DefaultFooterComponent,
-    IconDirective,NgClass,CommonModule
+    CommonModule
   ]
 })
-export class DefaultLayoutComponent implements OnInit {
+export class DefaultLayoutComponent implements OnInit  {
   public navItems: NavItem[] = [];
   public role: string = '';
   public showToast = false;
@@ -65,34 +65,10 @@ export class DefaultLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadNavItems();
-   this.notificationsService.notifications$.subscribe((msgs) => {
-          console.log('Notifications reçues:', msgs);
-          this.notifications = msgs.filter(notification => !notification.read);
-          this.cdRef.detectChanges(); // Détection des changements manuelle
-
-          // Auto-suppression après 10 secondes
-          this.notifications.forEach((_, index) => {
-            setTimeout(() => this.removeNotification(index), 10000);
-          });
-        });
+ 
 
   }
-   removeNotification(index: number): void {
-    const notificationElements = document.querySelectorAll('.notification');
-    if (notificationElements[index]) {
-      notificationElements[index].classList.add('fade-out'); // Animation CSS
-      setTimeout(() => {
-        this.notifications.splice(index, 1);
-        this.cdRef.detectChanges();
-      }, 500);
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.notificationSubscription) {
-      this.notificationSubscription.unsubscribe();
-    }
-  }
+   
 
   loadNavItems(): void {
     const token = localStorage.getItem('token');
@@ -117,27 +93,7 @@ export class DefaultLayoutComponent implements OnInit {
   }
 
 
-  setupNotificationListener(): void {
-    this.notificationSubscription = this.notificationsService.notifications$.subscribe(notifications => {
-      if (notifications && notifications.length > 0) {
-        const latestNotification = notifications[0]; // Prendre la notification la plus récente
-        if (!latestNotification.read) {
-          this.showToastNotification(latestNotification.message);
-        }
-      }
-    });
-  }
-
-  showToastNotification(message: string, type: string = 'info'): void {
-    this.toastMessage = message;
-    this.toastType = type;
-    this.showToast = true;
-    
-    // Masquer automatiquement après 5 secondes
-    setTimeout(() => {
-      this.showToast = false;
-    }, 5000);
-  }
+  
 
   onScrollbarUpdate($event: any): void {
     // Logique de mise à jour du scrollbar (facultatif)

@@ -79,18 +79,28 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit, O
   
     
     // 📌 Écoute des notifications stockées + en temps réel
-    this.notificationsSubscription = this.notificationsService.notifications$.subscribe((notifications) => {
-      // Trier pour afficher les nouvelles notifications en premier
-      this.notifications = [...notifications].sort((a, b) => (a.read === b.read ? 0 : a.read ? 1 : -1));
-    });
+     this.notificationsSubscription = this.notificationsService.notifications$.subscribe({
+      next: (notifications) => {
+        // Sort notifications: unread first, then by date
+        this.notifications = [...notifications].sort((a, b) => {
+          if (a.read !== b.read) return a.read ? 1 : -1
+          // Sort by date (newest first) if read status is the same
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        })
+      },
+      error: (err) => {
+        console.error("Error in notifications subscription:", err)
+      },
+    })
+
+    // Add the subscription to the main subscription for proper cleanup
+    this.subscription.add(this.notificationsSubscription)
 
     const profileSub = this.profileService.profilePictureUrl$.subscribe((url) => {
-      this.profilePictureUrl = url || './assets/images/avatars/8.jpg'; // Image par défaut
-    });
-  
-    this.subscription.add(profileSub);
-  
+      this.profilePictureUrl = url || "./assets/images/avatars/8.jpg" // Image par défaut
+    })
 
+    this.subscription.add(profileSub)
   }
   getUserInitials(): string {
     const userEmail = localStorage.getItem('userEmail') || '';
