@@ -2,14 +2,16 @@
   <!-- Filtres -->
   <div class="row mb-4 filter-card p-3">
     <div class="col-md-6">
-      <label class="form-label">Filtrer par employé</label>
+      <label class="form-label">
+        <i class="bi bi-person-fill me-2"></i>Filtrer par employé</label>
       <select class="form-select arabsoft-select" [(ngModel)]="filtreEmployeId" (change)="filtrerAbsences()">
         <option value="">Tous les employés</option>
         <option *ngFor="let emp of employes" [value]="emp.id">{{ emp.nom }}</option>
       </select>
     </div>
     <div class="col-md-6">
-      <label class="form-label">Filtrer par date</label>
+      <label class="form-label">
+        <i class="bi bi-calendar-event-fill me-2"></i>Filtrer par date</label>
       <input type="date" class="form-control arabsoft-input" [(ngModel)]="filtreDate" (change)="filtrerAbsences()" />
     </div>
   </div>
@@ -19,7 +21,9 @@
     <div class="arabsoft-card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">Liste des absences</h5>
       <div>
-        <button class="btn btn-light btn-sm me-2" (click)="openModal()">➕</button>
+        <button class="btn btn-light btn-sm me-2" (click)="openModal()">
+          <i class="bi bi-plus-circle-fill"></i> <!-- changed -->
+        </button>
         <div *ngIf="loading" class="spinner-border text-light" role="status" style="width: 1.5rem; height: 1.5rem;">
           <span class="visually-hidden">Loading...</span>
         </div>
@@ -29,7 +33,9 @@
       <table class="table table-striped mb-0" *ngIf="filteredAbsences.length > 0; else noAbsences">
         <thead class="arabsoft-table-header">
           <tr>
-            <th (click)="trierParNom()" style="cursor: pointer">Employé ⬍</th>
+            <th (click)="trierParNom()" style="cursor: pointer">
+              Employé <i class="bi bi-arrow-down-up"></i> <!-- changed -->
+            </th>
             <th>Date</th>
             <th>Motif</th>
             <th>Justifiée</th>
@@ -43,7 +49,8 @@
             <td>{{ absence.motif }}</td>
             <td>
               <span [ngClass]="absence.justifiee ? 'arabsoft-badge-success' : 'arabsoft-badge-danger'">
-                {{ absence.justifiee ? '✅ Oui' : '❌ Non' }}
+                <i *ngIf="absence.justifiee" class="bi bi-check-circle-fill text-success"></i>
+                <i *ngIf="!absence.justifiee" class="bi bi-x-circle-fill text-danger"></i> <!-- changed -->
               </span>
             </td>
             <td>{{ absence.chef?.nom || 'N/A' }}</td>
@@ -53,7 +60,9 @@
 
       <ng-template #noAbsences>
         <div class="p-3">
-          <p class="text-muted text-center mb-0 arabsoft-icon-empty">🙁</p>
+          <p class="text-center mb-0">
+            <i class="bi bi-emoji-frown-fill fs-1 text-muted"></i> <!-- changed -->
+          </p>
           <p class="text-muted text-center mb-0">Aucune absence trouvée.</p>
         </div>
       </ng-template>
@@ -98,8 +107,12 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn arabsoft-btn-primary">✅ Marquer comme absent</button>
-            <button type="button" class="btn arabsoft-btn-secondary" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="btn arabsoft-btn-primary">
+              <i class="bi bi-check2-circle"></i> Marquer comme absent <!-- optional -->
+            </button>
+            <button type="button" class="btn arabsoft-btn-secondary" (click)="closeModal()">
+              <i class="bi bi-x-circle"></i> Annuler <!-- optional -->
+            </button>
           </div>
         </form>
       </div>

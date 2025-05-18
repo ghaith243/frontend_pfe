@@ -113,6 +113,7 @@ export class DefaultLayoutComponent implements OnInit {
           } else {
             console.warn('ID utilisateur non trouvé dans les données');
           }
+          
           if (data.serviceId) {
             localStorage.setItem('serviceId', data.serviceId.toString());
           }
