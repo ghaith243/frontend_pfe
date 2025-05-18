@@ -14,19 +14,24 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   // Méthode pour se connecter
-  login(credentials: { email: string; motDePasse: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login`, credentials).pipe(
-      tap((response: any) => {
-        console.log("Réponse du backend:", response); // Vérifie si l'ID est présent
-  
-        if (response && response.role && response.id) {
-          localStorage.setItem('user', JSON.stringify(response));
-        } else {
-          console.error("Réponse invalide : ID manquant !");
-        }
-      })
-    );
-  }
+login(credentials: { email: string; motDePasse: string }): Observable<any> {
+  return this.http.post(`${this.apiUrl}/auth/login`, credentials).pipe(
+    tap((response: any) => {
+      console.log("Réponse du backend:", response);
+
+      if (response && response.role && response.id && response.token) {
+        localStorage.setItem('user', JSON.stringify(response));
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('userId', response.id.toString()); // <-- ici
+        localStorage.setItem('role', response.role);
+        localStorage.setItem('userEmail', response.email || credentials.email);
+      } else {
+        console.error("Réponse invalide : ID ou token manquant !");
+      }
+    })
+  );
+}
+
   sendResetCode(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/forgot-password`, null, {
       params: { email },
