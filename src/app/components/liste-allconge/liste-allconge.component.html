@@ -33,7 +33,7 @@
               <th>Date Fin</th>
               <th>Durée</th>
               <th>Statut</th>
-              <th>Actions</th>
+             
             </tr>
           </thead>
           <tbody>
@@ -57,17 +57,7 @@
                   {{ conge.status }}
                 </span>
               </td>
-              <td class="actions">
-                <button class="action-btn view-btn" title="Voir les détails">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button class="action-btn edit-btn" title="Modifier" *ngIf="conge.status === 'EN_ATTENTE'">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn delete-btn" title="Supprimer" *ngIf="conge.status === 'EN_ATTENTE'">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
+              
             </tr>
           </tbody>
         </table>

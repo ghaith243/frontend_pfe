@@ -218,4 +218,4 @@ export class CalendrierComponent implements OnInit {
   getCongesByStatus(status: string): Conge[] {
     return this.userConges.filter(conge => conge['status'] === status);
   }
-}
+} 

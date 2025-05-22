@@ -5,13 +5,13 @@
     --scrollbar-padding: 1px;
     --scrollbar-size: 5px;
     --scrollbar-thumb-color: #555555; // Gris du logo
-    --scrollbar-thumb-hover-color: #0066B3; // Bleu du logo
+    --scrollbar-thumb-hover-color: #78ddfb; // Bleu du logo
     --scrollbar-hover-size: calc(var(--scrollbar-size) * 1.5);
   }
 
   // Sidebar color
   .sidebar {
-    background-color: #ffffff !important; // fond blanc
+    background-color:#8886f4 !important; // fond blanc
     color: #333 !important;
 
     .c-sidebar-nav-link {
@@ -56,5 +56,33 @@
   background-color: #F5A623;
   border-color: #F5A623;
 }
+.user-profile-sidebar {
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  small {
+    font-size: 0.75rem;
+    display: block;
+    margin-top: -0.25rem;
+  }
+}
+.user-initial-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0052B4; // Couleur bleue Arabsoft
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+
 
 }

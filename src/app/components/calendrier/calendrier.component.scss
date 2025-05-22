@@ -7,9 +7,9 @@ $arabsoft-light-orange: #FFB74D;
 
 // Autres couleurs
 $approved-color: #4CAF50;
-$pending-color: $arabsoft-blue;
+$pending-color: $arabsoft-orange;
 $rejected-color: #FF5252;
-$in-progress-color: $arabsoft-orange;
+
 
 .calendar-container {
   padding: 1.5rem;
@@ -165,9 +165,7 @@ $in-progress-color: $arabsoft-orange;
           background-color: $rejected-color;
         }
         
-        &.status-in-progress {
-          background-color: $in-progress-color;
-        }
+     
       }
       
       .fc-h-event .fc-event-title {

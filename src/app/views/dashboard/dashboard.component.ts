@@ -36,7 +36,14 @@ export class DashboardComponent implements OnInit {
     enAttenteService: 0,
     demandesCeMois: 0
   };
-  
+  // Statistiques pour l'admin
+  adminStats = {
+  totalConges: 0,
+  approuves: 0,
+  rejetes: 0,
+  enAttente: 0,
+  totalServices: 0
+};
   currentRole: string = '';
   isLoading: boolean = true;
   errorMessage: string | null = null;
@@ -87,49 +94,71 @@ export class DashboardComponent implements OnInit {
   }
 
   // Fonction pour charger les statistiques de l'admin
-  private loadAdminStats(): void {
-    this.statsService.getAdminStats().subscribe(
-      (data) => {
-        if (data) {
-          this.charts = [
-            {
-              type: 'pie',
-              title: 'Répartition des types de congé',
-              data: {
-                labels: data.typesConge.map((item: { type: string }) => item.type),
-                datasets: [
-                  {
-                    data: data.typesConge.map((item: { count: number }) => item.count),
-                    backgroundColor: this.chartColors,
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: this.getChartOptions(),
-            },
-            {
-              type: 'bar',
-              title: 'Taux d\'occupation par service',
-              data: {
-                labels: data.occupationParService.map((item: { service: string }) => item.service),
-                datasets: [
-                  {
-                    data: data.occupationParService.map((item: { total: number }) => item.total),
-                    backgroundColor: this.arabsoftColors.blue,
-                  },
-                ],
-              },
-              options: this.getChartOptions(),
-            },
-          ];
+private loadAdminStats(): void {
+  this.statsService.getAdminStats().subscribe(
+    (data) => {
+      if (data) {
+        // Calcul des totaux pour les cartes
+        this.adminStats.totalServices = data.occupationParService.length || 0;
+        this.adminStats.totalConges = data.occupationParService.reduce(
+          (acc: number, item: { total: number }) => acc + (item.total || 0), 0
+        );
+        
+        // Si vous avez des données sur les statuts dans la réponse
+        if (data.congesStats) {
+          this.adminStats.approuves = data.congesStats.Approuvés || 0;
+          this.adminStats.rejetes = data.congesStats.Rejetés || 0;
+          this.adminStats.enAttente = data.congesStats['En attente'] || 0;
         }
-        this.isLoading = false;
-      },
-      (error) => {
-        this.handleError('Erreur lors du chargement des données Admin');
+        
+        this.charts = [
+          {
+            type: 'pie',
+            title: 'Répartition des types de congé',
+            data: {
+              labels: data.typesConge.map((item: { type: string }) => item.type),
+              datasets: [
+                {
+                  data: data.typesConge.map((item: { count: number }) => item.count),
+                  backgroundColor: this.chartColors,
+                  borderWidth: 0,
+                },
+              ],
+            },
+            options: this.getChartOptions(),
+          },
+          {
+            type: 'bar',
+            title: 'Taux d\'occupation par service',
+            data: {
+              labels: data.occupationParService.map((item: { service: string }) => item.service),
+              datasets: [
+                {
+                  label: 'Taux d\'occupation',
+                  data: data.occupationParService.map((item: { total: number }) => item.total),
+                  backgroundColor: this.arabsoftColors.blue,
+                },
+              ],
+            },
+            options: {
+              ...this.getChartOptions(),
+              plugins: {
+                ...this.getChartOptions()?.plugins,
+                legend: {
+                  display: false // Masquer la légende pour ce graphique spécifique
+                }
+              }
+            },
+          },
+        ];
       }
-    );
-  }
+      this.isLoading = false;
+    },
+    (error) => {
+      this.handleError('Erreur lors du chargement des données Admin');
+    }
+  );
+}
 
   // Fonction pour charger les statistiques du chef
   private loadChefStats(): void {
@@ -186,6 +215,7 @@ export class DashboardComponent implements OnInit {
               data: {
                 labels: safeData.demandesMensuelles.map((item: any) => `Mois ${item.mois}`),
                 datasets: [{
+                  label:"nombe mensuel de demandes",
                   data: safeData.demandesMensuelles.map((item: any) => item.count || 0),
                   backgroundColor: this.arabsoftColors.blue,
                   borderColor: this.arabsoftColors.blue,

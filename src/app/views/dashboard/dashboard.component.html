@@ -58,6 +58,30 @@
       <p class="stat-label">ce mois</p>
     </div>
   </div>
+  <!-- Cartes statistiques pour l'admin -->
+<div *ngIf="currentRole === 'ADMIN'" class="stats-cards">
+  <div class="stat-card">
+    <h3>Total Congés</h3>
+    <p class="stat-value">{{ adminStats.totalConges }}</p>
+    <p class="stat-label">tous services</p>
+  </div>
+  <div class="stat-card">
+    <h3>Approuvés</h3>
+    <p class="stat-value">{{ adminStats.approuves }}</p>
+    <p class="stat-label">demandes</p>
+  </div>
+  <div class="stat-card">
+    <h3>Rejetés</h3>
+    <p class="stat-value">{{ adminStats.rejetes }}</p>
+    <p class="stat-label">demandes</p>
+  </div>
+  <div class="stat-card">
+    <h3>En attente</h3>
+    <p class="stat-value">{{ adminStats.enAttente }}</p>
+    <p class="stat-label">demandes</p>
+  </div>
+
+</div>
 
   <!-- Indicateur de chargement -->
   <div *ngIf="isLoading" class="loading-spinner">

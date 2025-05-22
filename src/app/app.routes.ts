@@ -14,6 +14,7 @@ import { EmployeAbsenceComponent } from './components/absences/employe-absence/e
 import { ListeUserComponent } from './components/liste-user/liste-user.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { ListeAllcongeComponent } from './components/liste-allconge/liste-allconge.component';
+import { DashboardComponent } from './views/dashboard/dashboard.component';
 
 export const routes: Routes = [
   {
@@ -23,27 +24,27 @@ export const routes: Routes = [
   },
   {
     path: '',
-    //canActivate:[authGuard],
+    canActivate:[authGuard],
     component: DefaultLayoutComponent,
-    data: {
-      title: 'Home'
-    },
+  
     children: [
       {
-        path: 'dashboard',
-        loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
+        path: 'dashboard', component:DashboardComponent
+       , canActivate: [authGuard]
+        
       },
-      {path:'profile',component:ProfileComponent},
-      {path:'messagerie', component: MessagerieComponent },
-      {path:'demande',component:SubmitleaveComponent},
-      {path:'validation',component:LeavedecisionComponent},
-      {path:'mesconges',component:ListcongesComponent},
-      {path:'calendrier',component:CalendrierComponent},
-      {path:'absences',component:AbsencesComponent},
-      {path:'mesabsences',component:EmployeAbsenceComponent},
-      {path:'users',component:ListeUserComponent},
-      {path:'all-conges',component:ListeAllcongeComponent},
-      {path:'Notification',component:NotificationComponent},
+      
+      {path:'profile',component:ProfileComponent,canActivate: [authGuard]},
+      {path:'messagerie', component: MessagerieComponent ,canActivate: [authGuard]},
+      {path:'demande',component:SubmitleaveComponent,canActivate: [authGuard]},
+      {path:'validation',component:LeavedecisionComponent,canActivate: [authGuard]},
+      {path:'mesconges',component:ListcongesComponent,canActivate: [authGuard]},
+      {path:'calendrier',component:CalendrierComponent,canActivate: [authGuard]},
+      {path:'absences',component:AbsencesComponent,canActivate: [authGuard]},
+      {path:'mesabsences',component:EmployeAbsenceComponent,canActivate: [authGuard]},
+      {path:'users',component:ListeUserComponent,canActivate: [authGuard]},
+      {path:'all-conges',component:ListeAllcongeComponent,canActivate: [authGuard]},
+      {path:'Notification',component:NotificationComponent,canActivate: [authGuard]},
    
      
     
@@ -58,7 +59,7 @@ export const routes: Routes = [
       }
     ]
   },
-  {path:'forgotpass',component:ForgotPasswordComponent},
+  {path:'forgotpass',component:ForgotPasswordComponent,canActivate: [authGuard]},
   {
     path: '404',
     loadComponent: () => import('./views/pages/page404/page404.component').then(m => m.Page404Component),
@@ -89,7 +90,7 @@ export const routes: Routes = [
     }
   },
   {
-    path: 'notification',
+    path: 'notification',canActivate: [authGuard],
     loadComponent: () => import('./components/notification/notification.component').then(m => m.NotificationComponent),
     data: {
       title: 'notification Page'

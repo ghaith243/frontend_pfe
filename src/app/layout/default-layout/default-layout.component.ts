@@ -53,7 +53,11 @@ export class DefaultLayoutComponent implements OnInit  {
   public toastType = 'info'; // 'info', 'success', 'warning', 'error'
   private notificationSubscription!: Subscription;
   http: any;
-   notifications: any[] = [];
+ 
+    // Ajoutez ces propriétés à votre classe
+public userName: string = '';
+public userEmail: string = '';
+public userInitial: string = '';
 
   constructor(
     private authService: AuthService, 
@@ -70,42 +74,43 @@ export class DefaultLayoutComponent implements OnInit  {
   }
    
 
-  loadNavItems(): void {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.authService.getEmployeeData(token).subscribe(
-        (data) => {
 
-          this.role = data.role;
 
-          console.log('Données utilisateur reçues:', data);
+// Modifiez la méthode loadNavItems pour récupérer les infos utilisateur
+loadNavItems(): void {
+  const token = localStorage.getItem('token');
+  if (token) {
+    this.authService.getEmployeeData(token).subscribe(
+      (data) => {
+        this.role = data.role;
+        this.userName = data.nom; // Adaptez selon votre structure de données
+        this.userEmail = data.email;
+       this.userInitial =  data.nom?.charAt(0)?.toUpperCase()+data.nom?.charAt(1).toUpperCase() || 'U';
 
-          this.role = data.role; // Récupérer le rôle de l'utilisateur depuis la réponse de l'API
-          console.log('Rôle validé :', this.role);
+        console.log('Données utilisateur reçues:', data);
 
-           if (data.id) {
+        if (data.id) {
           localStorage.setItem('userId', data.id.toString());
           console.log('User ID stored in localStorage:', data.id);
-          } else {
-            console.warn('ID utilisateur non trouvé dans les données');
-          }
-          
-          if (data.serviceId) {
-            localStorage.setItem('serviceId', data.serviceId.toString());
-          }
-          if (this.role) {
-            this.navItems = navItems[this.role.toUpperCase()] || navItems['EMPLOYEE'];
-          }
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des données utilisateur:', error);
+        } else {
+          console.warn('ID utilisateur non trouvé dans les données');
         }
-      );
-    } else {
-      console.error('Token manquant dans le localStorage');
-    }
+        
+        if (data.serviceId) {
+          localStorage.setItem('serviceId', data.serviceId.toString());
+        }
+        if (this.role) {
+          this.navItems = navItems[this.role.toUpperCase()] || navItems['EMPLOYEE'];
+        }
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des données utilisateur:', error);
+      }
+    );
+  } else {
+    console.error('Token manquant dans le localStorage');
   }
-
+}
 
   
 
