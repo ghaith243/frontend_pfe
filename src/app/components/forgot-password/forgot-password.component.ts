@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardBodyComponent, CardComponent, CardGroupComponent, ColComponent, ContainerComponent, FormModule, RowComponent } from '@coreui/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-forgot-password',
@@ -17,7 +18,7 @@ export class ForgotPasswordComponent {
   confirmPassword = ""
   codeSent = false
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit() {
     this.authService.sendResetCode(this.email).subscribe(
@@ -40,31 +41,39 @@ export class ForgotPasswordComponent {
     )
   }
 
-  onReset() {
-    this.authService.resetPassword(this.email, this.code, this.newPassword).subscribe(
-      (response) => {
-        // Assurer que la réponse contient le message attendu
-        if (response && response.message === "Mot de passe réinitialisé avec succès") {
-          alert("Mot de passe réinitialisé avec succès. Vous pouvez vous connecter.")
-          
-          this.codeSent = false
-          this.email = ""
-          this.code = ""
-          this.newPassword = ""
-          this.confirmPassword = ""
-        } else {
-          alert("Erreur : " + (response.message || "Échec de la réinitialisation."))
-        }
-      },
-      (error) => {
-        // Afficher l'erreur exacte en console pour déboguer
-        console.log("Erreur de réinitialisation:", error)
-        const errorMessage = error.error?.message || "Échec de la réinitialisation."
-        alert("Erreur : " + errorMessage)
-      },
-    )
+onReset() {
+  if (this.newPassword !== this.confirmPassword) {
+    alert("Les mots de passe ne correspondent pas");
+    return;
   }
 
+  this.authService.resetPassword(this.email, this.code, this.newPassword).subscribe({
+    next: (response: any) => {
+      const message = typeof response === 'string' ? response : response?.message;
+      alert(message || "Mot de passe réinitialisé avec succès");
+      
+      // Reset du formulaire
+      this.resetform();
+      
+      // Redirection vers login
+      this.router.navigate(['/login']);
+    },
+    error: (error) => {
+      console.error("Erreur:", error);
+      const errorMessage = error.error?.message || 
+      error.message || "Échec de la réinitialisation";
+      alert("Erreur: " + errorMessage);
+    }
+  });
+}
+
+resetform(){
+   this.email = ""
+  this.code = ""
+  this.newPassword = ""
+  this.confirmPassword = ""
+  this.codeSent = false
+}
   resendCode() {
     this.authService.sendResetCode(this.email).subscribe(
       () => {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Route, Router } from '@angular/router';
 
@@ -35,13 +35,20 @@ login(credentials: { email: string; motDePasse: string }): Observable<any> {
   sendResetCode(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/forgot-password`, null, {
       params: { email },
+    responseType: 'text'
+
     });
   }
   
-  resetPassword(email: string, code: string, newPassword: string): Observable<any> {
-    const params = { email, code, newPassword };
-    return this.http.post(`${this.apiUrl}/auth/reset-password`, null, { params });
-  }
+resetPassword(email: string, code: string, newPassword: string): Observable<any> {
+  const params = new HttpParams()
+    .set('email', email)
+    .set('code', code)
+    .set('newPassword', newPassword);
+    
+  return this.http.post(`${this.apiUrl}/auth/reset-password`, null, { params });
+
+}
   
   getUserName(): string {
     const userData = localStorage.getItem('user');

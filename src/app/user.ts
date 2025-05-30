@@ -2,7 +2,7 @@ export interface User {
     id: number
     nom: string
     email: string
-    role: Role; // était string
+    role: Role; 
     service: Department;
     enfantCount:number;
   }
